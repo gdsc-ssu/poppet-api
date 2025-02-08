@@ -1,6 +1,6 @@
 package com.gdg.poppet.global.exception;
 
-import com.gdg.poppet.global.dto.ApiResponse;
+import com.gdg.poppet.global.response.ApiResponse;
 import com.gdg.poppet.global.status.ErrorStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
