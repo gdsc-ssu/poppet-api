@@ -2,11 +2,13 @@ package com.gdg.poppet.chat.application.service;
 
 import com.gdg.poppet.chat.application.util.GoogleCloudUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ChatServiceImpl implements ChatService {
 
     private final GoogleCloudUtil googleCloudUtil;
@@ -18,15 +20,15 @@ public class ChatServiceImpl implements ChatService {
      * @return : AI의 대화 응답값을 음성 파일로 변환환 결과
      */
     @Override
-    public String chat(MultipartFile requestFile) {
+    public byte[] chat(MultipartFile requestFile) {
 
         // 1. STT를 이용해 텍스트 추출
         String requestText = googleCloudUtil.speechToText(requestFile);
+        log.info("[*] requestText : {}", requestText);
 
         // 2. Gemini를 이용해 응답 생성
 
         // 3. TTS를 이용해 음성파일 추출
-
-        return requestText;
+        return googleCloudUtil.textToSpeech(requestText);
     }
 }

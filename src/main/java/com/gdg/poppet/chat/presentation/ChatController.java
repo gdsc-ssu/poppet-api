@@ -20,7 +20,7 @@ public class ChatController {
     private final ChatService chatService;
 
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<String>> postChat( // TODO: NAMING
+    public ResponseEntity<ApiResponse<byte[]>> postChat( // TODO: NAMING
             @RequestParam("chat") MultipartFile requestChat
     ){
         return ApiResponse.success(SuccessStatus.CHAT_SUCCESS, chatService.chat(requestChat));

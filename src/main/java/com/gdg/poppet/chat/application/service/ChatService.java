@@ -5,5 +5,5 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public interface ChatService {
-    String chat(MultipartFile message);
+    byte[] chat(MultipartFile message);
 }
