@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -20,15 +22,19 @@ public class ChatServiceImpl implements ChatService {
      * @return : AI의 대화 응답값을 음성 파일로 변환환 결과
      */
     @Override
-    public byte[] chat(MultipartFile requestFile) {
+    public byte[] chat(List<MultipartFile> requestFile) {
+        StringBuilder requestText = new StringBuilder();
 
-        // 1. STT를 이용해 텍스트 추출
-        String requestText = googleCloudUtil.speechToText(requestFile);
-        log.info("[*] requestText : {}", requestText);
+        for (MultipartFile file : requestFile) {
+            // 1. STT를 이용해 텍스트 추출
+            String text = googleCloudUtil.speechToText(file);
+            requestText.append(text);
+        }
+        log.info("[*] requestText : {}", requestText.toString());
 
         // 2. Gemini를 이용해 응답 생성
 
         // 3. TTS를 이용해 음성파일 추출
-        return googleCloudUtil.textToSpeech(requestText);
+        return googleCloudUtil.textToSpeech(requestText.toString());
     }
 }

@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/chats")
@@ -21,7 +23,7 @@ public class ChatController {
 
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<byte[]>> postChat( // TODO: NAMING
-            @RequestParam("chat") MultipartFile requestChat
+            @RequestParam("chat") List<MultipartFile> requestChat
     ){
         return ApiResponse.success(SuccessStatus.CHAT_SUCCESS, chatService.chat(requestChat));
     }

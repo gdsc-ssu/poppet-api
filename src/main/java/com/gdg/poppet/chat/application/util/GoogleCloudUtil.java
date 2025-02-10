@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 @Slf4j
@@ -90,6 +92,11 @@ public class GoogleCloudUtil {
             // 오디오 변환 결과
             SynthesizeSpeechResponse response = textToSpeechClient.synthesizeSpeech(input, voice, audioConfig);
             ByteString audioContents = response.getAudioContent();
+
+            try (OutputStream out = new FileOutputStream("output.mp3")) {
+                out.write(audioContents.toByteArray());
+            }
+
             return audioContents.toByteArray();
 
         } catch (Exception e) {
