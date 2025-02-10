@@ -7,6 +7,8 @@ import com.google.cloud.texttospeech.v1.*;
 import com.google.protobuf.ByteString;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -74,7 +76,7 @@ public class GoogleCloudUtil {
      *
      * @param text 오디오 파일로 전환할 텍스트
      */
-    public byte[] textToSpeech(String text) {
+    public Resource textToSpeech(String text) {
 
         try {
             // 변환할 텍스트 설정
@@ -97,8 +99,7 @@ public class GoogleCloudUtil {
                 out.write(audioContents.toByteArray());
             }
 
-            return audioContents.toByteArray();
-
+            return new ByteArrayResource(audioContents.toByteArray());
         } catch (Exception e) {
             log.warn("[*] Google TTS 변환 중 오류 발생 : {}", e.getMessage());
             throw new RuntimeException(e);

@@ -3,6 +3,7 @@ package com.gdg.poppet.chat.application.service;
 import com.gdg.poppet.chat.application.util.GoogleCloudUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,7 +23,7 @@ public class ChatServiceImpl implements ChatService {
      * @return : AI의 대화 응답값을 음성 파일로 변환환 결과
      */
     @Override
-    public byte[] chat(List<MultipartFile> requestFile) {
+    public Resource chat(List<MultipartFile> requestFile) {
         StringBuilder requestText = new StringBuilder();
 
         for (MultipartFile file : requestFile) {
