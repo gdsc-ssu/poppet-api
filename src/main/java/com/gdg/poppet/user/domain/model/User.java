@@ -33,8 +33,7 @@ public class User extends BaseEntity {
     @Column(name = "age", nullable = false)
     private int age;
 
-    @ElementCollection(fetch = FetchType.LAZY)
-    @Column(name = "emails", nullable = true)
-    private List<String> emails;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Email> emails;
 
 }
