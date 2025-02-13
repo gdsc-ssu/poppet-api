@@ -1,4 +1,4 @@
-package com.gdg.poppet.global.dto;
+package com.gdg.poppet.global.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
