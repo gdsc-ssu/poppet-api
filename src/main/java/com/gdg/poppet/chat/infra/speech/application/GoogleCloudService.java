@@ -1,4 +1,4 @@
-package com.gdg.poppet.chat.infra.service;
+package com.gdg.poppet.chat.infra.speech.application;
 
 import com.gdg.poppet.global.exception.GlobalException;
 import com.gdg.poppet.global.status.ErrorStatus;
