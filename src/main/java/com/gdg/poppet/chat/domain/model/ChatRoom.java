@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "chat_room")
+@Table(name = "chat_rooms")
 public class ChatRoom extends BaseEntity {
 
     @Id
