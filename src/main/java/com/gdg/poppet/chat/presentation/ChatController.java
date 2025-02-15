@@ -31,7 +31,7 @@ public class ChatController {
         return ApiResponse.success(SuccessStatus.CHAT_SUCCESS, chatService.chat(requestChat));
     }
 
-    @PostMapping("/test")
+    @PostMapping("/test") // 대화 기능 테스트를 위한 임시 API
     public ResponseEntity<ApiResponse<String>> testChat(@RequestParam("chat") String chat) {
         return ApiResponse.success(SuccessStatus.CHAT_SUCCESS, geminiService.generateAiResponse(chat));
     }
