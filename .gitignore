@@ -38,3 +38,4 @@ out/
 
 src/main/resources/application-secret.yml
 src/main/resources/poppet-client.json
+src/main/resources/gemini-chat-prompt.txt

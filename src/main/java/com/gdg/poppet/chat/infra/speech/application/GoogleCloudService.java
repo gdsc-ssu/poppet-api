@@ -1,4 +1,4 @@
-package com.gdg.poppet.chat.application.util;
+package com.gdg.poppet.chat.infra.speech.application;
 
 import com.gdg.poppet.global.exception.GlobalException;
 import com.gdg.poppet.global.status.ErrorStatus;
@@ -19,7 +19,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class GoogleCloudUtil {
+public class GoogleCloudService {
     private final SpeechClient speechClient;
     private final TextToSpeechClient textToSpeechClient;
 
