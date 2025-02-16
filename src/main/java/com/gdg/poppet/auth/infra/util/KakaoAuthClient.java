@@ -1,4 +1,4 @@
-package com.gdg.poppet.auth.application.util;
+package com.gdg.poppet.auth.infra.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +19,7 @@ import java.util.Arrays;
 
 @Component
 @Slf4j
-public class KakaoUtil {
+public class KakaoAuthClient {
 
     @Value("${kakao.auth.client}")
     private String client;
