@@ -38,15 +38,31 @@ public class AuthServiceImpl implements AuthService {
         return null;
     }
 
+
     private User createNewUser(KakaoProfileDTO kakaoProfile) {
         User newUser = AuthConverter.toUser(
                 kakaoProfile.getId(),
                 kakaoProfile.getKakaoAccount().getEmail(),
-                // TODO : gender랑 age 정보 승인 대기중
-                null,
-                20
+                kakaoProfile.getKakaoAccount().getGender(),
+                getEstimatedAge(kakaoProfile.getKakaoAccount().getAgeRange())
         );
         return userRepository.save(newUser);
+    }
+
+    // 카카오는 나이를 20대, 30대 형태로 제공해 줌.
+    // 나이 범위 -> 평균 나이
+    private int getEstimatedAge(String ageRange) {
+        if (ageRange != null && ageRange.contains("~")) {
+            try {
+                String[] range = ageRange.split("~");
+                int minAge = Integer.parseInt(range[0].trim());
+                int maxAge = Integer.parseInt(range[1].trim());
+                return (minAge + maxAge) / 2;
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException(e);
+            }
+        }
+        return -1;
     }
 
 }

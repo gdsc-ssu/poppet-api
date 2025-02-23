@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 @Data
 @NoArgsConstructor
 public class KakaoProfileDTO {
@@ -38,6 +42,11 @@ public class KakaoProfileDTO {
         @JsonProperty("profile_image_needs_agreement")
         private boolean profileImageNeedsAgreement;
 
+        @JsonProperty("name_needs_agreement")
+        private boolean nameNeedsAgreement;
+
+        private String name;
+
         private Profile profile;
 
         @JsonProperty("has_email")
@@ -53,6 +62,23 @@ public class KakaoProfileDTO {
         private boolean isEmailVerified;
 
         private String email;
+
+        @JsonProperty("has_age_range")
+        private boolean hasAgeRange;
+
+        @JsonProperty("age_range_needs_agreement")
+        private boolean ageRangeNeedsAgreement;
+
+        @JsonProperty("age_range")
+        private String ageRange;
+
+        @JsonProperty("has_gender")
+        private boolean hasGender;
+
+        @JsonProperty("gender_needs_agreement")
+        private boolean genderNeedsAgreement;
+
+        private String gender;
 
         @Data
         @NoArgsConstructor
