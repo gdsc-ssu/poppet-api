@@ -33,16 +33,14 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByUserId(kakaoProfile.getId())
                 .orElseGet(() -> createNewUser(kakaoProfile));
 
-        // TODO DTO 객체 변환
-
-        return null;
+        return UserDto.of(user.getUsername());
     }
 
 
     private User createNewUser(KakaoProfileDTO kakaoProfile) {
         User newUser = AuthConverter.toUser(
                 kakaoProfile.getId(),
-                kakaoProfile.getKakaoAccount().getEmail(),
+                kakaoProfile.getKakaoAccount().getName(),
                 kakaoProfile.getKakaoAccount().getGender(),
                 getEstimatedAge(kakaoProfile.getKakaoAccount().getAgeRange())
         );
