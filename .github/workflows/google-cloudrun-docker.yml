@@ -48,14 +48,28 @@ jobs:
       - name: Show Jar files
         run: find . -name "*.jar"
 
-      # 5) Dockerfile 복호화 (Secrets에서 가져옴)
+      ################################################################
+      # [새로 추가] 5) Secrets에서 민감 파일을 임시로 생성
+      ################################################################
+      - name: Create poppet-client.json
+        run: echo "$POPPET_CLIENT_JSON" > src/main/resources/poppet-client.json
+        env:
+          POPPET_CLIENT_JSON: ${{ secrets.POPPET_CLIENT_JSON }}
+
+      - name: Create application-secret.yml
+        run: echo "$APPLICATION_SECRET_YML" > src/main/resources/application-secret.yml
+        env:
+          APPLICATION_SECRET_YML: ${{ secrets.APPLICATION_SECRET_YML }}
+      ################################################################
+
+      # 6) Dockerfile 복호화 (Secrets에서 가져옴)
       - name: Decode Dockerfile from secret and save it
         run: |
           echo "$DOCKERFILE" > Dockerfile
         env:
           DOCKERFILE: ${{ secrets.DOCKERFILE }}
 
-      # 6) Artifact Registry 로그인
+      # 7) Artifact Registry 로그인
       - name: 'Docker Auth'
         uses: 'docker/login-action@v3'
         with:
@@ -63,7 +77,7 @@ jobs:
           password: '${{ steps.auth.outputs.auth_token }}'
           registry: '${{ env.REGION }}-docker.pkg.dev'
 
-      # 7) Docker 빌드 & 푸시
+      # 8) Docker 빌드 & 푸시
       - name: 'Build and Push Container'
         run: |-
           gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://asia-northeast3-docker.pkg.dev
@@ -71,7 +85,7 @@ jobs:
           docker build --tag "${DOCKER_TAG}" .
           docker push "${DOCKER_TAG}"
 
-      # 8) Cloud Run 배포
+      # 9) Cloud Run 배포
       - name: 'Deploy to Cloud Run'
         uses: 'google-github-actions/deploy-cloudrun@v2'
         with:
@@ -79,7 +93,7 @@ jobs:
           region: '${{ env.REGION }}'
           image: '${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/poppet-api:${{ github.sha }}'
 
-      # 9) 배포 후 URL 출력
+      # 10) 배포 후 URL 출력
       - name: 'Show output'
         run: |
           echo ${{ steps.deploy.outputs.url }}
