@@ -7,7 +7,7 @@ on:
 env:
   PROJECT_ID: 'poppet-sol4' 
   REGION: 'asia-northeast3'
-  SERVICE: 'poppet'
+  SERVICE: 'poppet-sol4'
   WORKLOAD_IDENTITY_PROVIDER: 'projects/162314042262/locations/global/workloadIdentityPools/poppet-github-actions/providers/poppet-github-actions'
 
 jobs:
