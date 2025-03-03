@@ -39,7 +39,7 @@ env:
   PROJECT_ID: 'poppet-sol4' # TODO: update to your Google Cloud project ID
   REGION: 'asia-northeast3' # TODO: update to your region
   SERVICE: 'poppet' # TODO: update to your service name
-  WORKLOAD_IDENTITY_PROVIDER: 'projects/162314042262/locations/global/workloadIdentityPools/tle-github-actions/providers/github-actions' # TODO: update to your workload identity provider
+  WORKLOAD_IDENTITY_PROVIDER: 'projects/162314042262/locations/global/workloadIdentityPools/tle-github-actions/providers/github-provider' # TODO: update to your workload identity provider
 
 jobs:
   deploy:
