@@ -23,7 +23,7 @@ spring:
   cloud:
     gcp:
       credentials:
-        location: ${GCP_CREDENTIALS_PATH}
+        location: ${GCP_CREDENTIALS_JSON}
 
 ai:
   gemini:
