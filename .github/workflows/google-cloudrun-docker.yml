@@ -75,7 +75,7 @@ jobs:
       - name: 'Deploy to Cloud Run'
         uses: 'google-github-actions/deploy-cloudrun@v2'
         with:
-          service: 'poppet-server'
+          service: 'poppet-sol4-server'
           region: '${{ env.REGION }}'
           image: '${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/poppet-api:${{ github.sha }}'
           # 여기서 민감 값을 Cloud Run 환경 변수로 주입
