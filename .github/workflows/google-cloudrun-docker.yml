@@ -48,15 +48,6 @@ jobs:
       - name: Show Jar files
         run: find . -name "*.jar"
 
-      ################################################################
-      # (유지) Secrets에서 GCP 인증 파일(poppet-client.json) 임시 생성
-      ################################################################
-      - name: Create poppet-client.json
-        run: echo "$POPPET_CLIENT_JSON" > poppet-client.json
-        env:
-          POPPET_CLIENT_JSON: ${{ secrets.POPPET_CLIENT_JSON }}
-      ################################################################
-
       # 5) Dockerfile 복호화 (Secrets에서 가져옴)
       - name: Decode Dockerfile from secret and save it
         run: |
@@ -93,7 +84,8 @@ jobs:
             DB_USERNAME=${{ secrets.DB_USERNAME }},
             DB_PASSWORD=${{ secrets.DB_PASSWORD }},
             AI_GEMINI_API_KEY=${{ secrets.AI_GEMINI_API_KEY }},
-            KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}
+            KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }},
+            GCP_CREDENTIALS_JSON=${{ secrets.GCP_CREDENTIALS_JSON }}
 
       # 9) 배포 후 URL 출력
       - name: 'Show output'

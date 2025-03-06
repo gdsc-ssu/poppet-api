@@ -5,6 +5,8 @@ import com.google.cloud.speech.v1.SpeechClient;
 import com.google.cloud.speech.v1.SpeechSettings;
 import com.google.cloud.texttospeech.v1.TextToSpeechClient;
 import com.google.cloud.texttospeech.v1.TextToSpeechSettings;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,12 +18,14 @@ import java.io.IOException;
 @Slf4j
 @Configuration
 public class GoogleCloudConfig {
-    @Value("${spring.cloud.gcp.credentials.location}")
-    String gcsCredentials;
+    @Value("${GCP_CREDENTIALS_JSON}")
+    private String gcpCredentialsJson;
 
     @Bean
     public GoogleCredentials googleCredentials() throws IOException {
-        return GoogleCredentials.fromStream(new FileInputStream(gcsCredentials));
+        return GoogleCredentials.fromStream(
+                new ByteArrayInputStream(gcpCredentialsJson.getBytes(StandardCharsets.UTF_8))
+        );
     }
 
     @Bean
