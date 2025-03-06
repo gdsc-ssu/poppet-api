@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
   profiles:
     active: dev
   datasource:
@@ -21,14 +23,12 @@ spring:
   cloud:
     gcp:
       credentials:
-        # GCP 인증 파일은 깃허브 Secrets에 파일 내용을 저장 후
-        # GitHub Actions에서 임시로 poppet-client.json 생성하여 사용
-        location: file:./poppet-client.json
+        location: ${GCP_CREDENTIALS_PATH}
 
 ai:
   gemini:
     base-host: generativelanguage.googleapis.com
-    key: ${AI_GEMINI_API_KEY}   # 민감 정보는 환경 변수로 주입
+    key: ${AI_GEMINI_API_KEY}
 
 kakao:
   auth:
