@@ -1,6 +1,4 @@
 spring:
-  config:
-    import: optional:file:.env[.properties]
   profiles:
     active: dev
   datasource:
@@ -22,8 +20,9 @@ spring:
 
   cloud:
     gcp:
+      # "location" 설정 삭제 혹은 무시 (우리는 GOOGLE_APPLICATION_CREDENTIALS로 인증)
       credentials:
-        location: ${GCP_CREDENTIALS_JSON}
+        location: ${GOOGLE_APPLICATION_CREDENTIALS}
 
 ai:
   gemini:

@@ -5,7 +5,7 @@ on:
     branches: [ "develop" ]
 
 env:
-  PROJECT_ID: 'poppet-sol4' 
+  PROJECT_ID: 'poppet-sol4'
   REGION: 'asia-northeast3'
   SERVICE: 'poppet-sol4'
   WORKLOAD_IDENTITY_PROVIDER: 'projects/162314042262/locations/global/workloadIdentityPools/poppet-github-actions/providers/poppet-github-actions'
@@ -49,17 +49,12 @@ jobs:
         run: find . -name "*.jar"
 
       ################################################################
-      # 5) .env 파일 생성 (GitHub Secrets -> .env)
+      # 5) poppet-client.json 생성 (Secrets -> JSON 파일)
       ################################################################
-      - name: Create .env file
-        run: |
-          echo "DB_URL=${{ secrets.DB_URL }}" >> .env
-          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "AI_GEMINI_API_KEY=${{ secrets.AI_GEMINI_API_KEY }}" >> .env
-          echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
-          echo "GCP_CREDENTIALS_JSON=${{ secrets.GCP_CREDENTIALS_JSON }}" >> .env
-      ################################################################
+      - name: Create poppet-client.json
+        run: echo "$GCP_CREDENTIALS_JSON" > poppet-client.json
+        env:
+          GCP_CREDENTIALS_JSON: ${{ secrets.GCP_CREDENTIALS_JSON }}
 
       # 6) Dockerfile 복호화 (Secrets에서 가져옴)
       - name: Decode Dockerfile from secret and save it
@@ -76,19 +71,19 @@ jobs:
           password: '${{ steps.auth.outputs.auth_token }}'
           registry: '${{ env.REGION }}-docker.pkg.dev'
 
-      # 8) Docker 빌드 & 푸시
+      # 8) Docker 빌드 & 푸시 (COPY poppet-client.json)
       - name: 'Build and Push Container'
         run: |-
-          # 8-1) 로그인
+          # 로그인
           gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://asia-northeast3-docker.pkg.dev
 
-          # 8-2) Docker TAG
+          # Docker Tag
           DOCKER_TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/poppet-api:${{ github.sha }}"
 
-          # 8-3) Build container – pass .env or load .env in Docker build
+          # 빌드 (Dockerfile이 . 에 위치)
           docker build --tag "${DOCKER_TAG}" .
 
-          # 8-4) Push
+          # 푸시
           docker push "${DOCKER_TAG}"
 
       # 9) Cloud Run 배포

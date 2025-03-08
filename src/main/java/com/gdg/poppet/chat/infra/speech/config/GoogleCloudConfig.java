@@ -18,14 +18,13 @@ import java.io.IOException;
 @Slf4j
 @Configuration
 public class GoogleCloudConfig {
-    @Value("${GCP_CREDENTIALS_JSON}")
-    private String gcpCredentialsJson;
+    @Value("${GOOGLE_APPLICATION_CREDENTIALS}")
+    private String googleApplicationCredentials;
 
     @Bean
     public GoogleCredentials googleCredentials() throws IOException {
-        return GoogleCredentials.fromStream(
-                new ByteArrayInputStream(gcpCredentialsJson.getBytes(StandardCharsets.UTF_8))
-        );
+        return GoogleCredentials.fromStream(new FileInputStream(googleApplicationCredentials));
+
     }
 
     @Bean
