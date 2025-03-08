@@ -48,14 +48,27 @@ jobs:
       - name: Show Jar files
         run: find . -name "*.jar"
 
-      # 5) Dockerfile 복호화 (Secrets에서 가져옴)
+      ################################################################
+      # 5) .env 파일 생성 (GitHub Secrets -> .env)
+      ################################################################
+      - name: Create .env file
+        run: |
+          echo "DB_URL=${{ secrets.DB_URL }}" >> .env
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "AI_GEMINI_API_KEY=${{ secrets.AI_GEMINI_API_KEY }}" >> .env
+          echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
+          echo "GCP_CREDENTIALS_JSON=${{ secrets.GCP_CREDENTIALS_JSON }}" >> .env
+      ################################################################
+
+      # 6) Dockerfile 복호화 (Secrets에서 가져옴)
       - name: Decode Dockerfile from secret and save it
         run: |
           echo "$DOCKERFILE" > Dockerfile
         env:
           DOCKERFILE: ${{ secrets.DOCKERFILE }}
 
-      # 6) Artifact Registry 로그인
+      # 7) Artifact Registry 로그인
       - name: 'Docker Auth'
         uses: 'docker/login-action@v3'
         with:
@@ -63,31 +76,30 @@ jobs:
           password: '${{ steps.auth.outputs.auth_token }}'
           registry: '${{ env.REGION }}-docker.pkg.dev'
 
-      # 7) Docker 빌드 & 푸시
+      # 8) Docker 빌드 & 푸시
       - name: 'Build and Push Container'
         run: |-
+          # 8-1) 로그인
           gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://asia-northeast3-docker.pkg.dev
+
+          # 8-2) Docker TAG
           DOCKER_TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/poppet-api:${{ github.sha }}"
+
+          # 8-3) Build container – pass .env or load .env in Docker build
           docker build --tag "${DOCKER_TAG}" .
+
+          # 8-4) Push
           docker push "${DOCKER_TAG}"
 
-      # 8) Cloud Run 배포
+      # 9) Cloud Run 배포
       - name: 'Deploy to Cloud Run'
         uses: 'google-github-actions/deploy-cloudrun@v2'
         with:
           service: 'poppet-sol4-server'
           region: '${{ env.REGION }}'
           image: '${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/poppet-api:${{ github.sha }}'
-          # 여기서 민감 값을 Cloud Run 환경 변수로 주입
-          env_vars: >
-            DB_URL=${{ secrets.DB_URL }},
-            DB_USERNAME=${{ secrets.DB_USERNAME }},
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }},
-            AI_GEMINI_API_KEY=${{ secrets.AI_GEMINI_API_KEY }},
-            KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }},
-            GCP_CREDENTIALS_JSON=${{ secrets.GCP_CREDENTIALS_JSON }}
 
-      # 9) 배포 후 URL 출력
+      # 10) 배포 후 URL 출력
       - name: 'Show output'
         run: |
           echo ${{ steps.deploy.outputs.url }}
