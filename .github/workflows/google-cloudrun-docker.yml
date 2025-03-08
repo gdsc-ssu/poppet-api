@@ -49,7 +49,7 @@ jobs:
         run: find . -name "*.jar"
 
       ################################################################
-      # 5) poppet-client.json 생성 (Secrets -> JSON 파일)
+      # 5) poppet-client.json 생성 (GitHub Secrets -> JSON 파일)
       ################################################################
       - name: Create poppet-client.json
         run: echo "$GCP_CREDENTIALS_JSON" > poppet-client.json
@@ -71,19 +71,15 @@ jobs:
           password: '${{ steps.auth.outputs.auth_token }}'
           registry: '${{ env.REGION }}-docker.pkg.dev'
 
-      # 8) Docker 빌드 & 푸시 (COPY poppet-client.json)
+      # 8) Docker 빌드 & 푸시 (COPY poppet-client.json, build-arg 전달)
       - name: 'Build and Push Container'
         run: |-
-          # 로그인
           gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://asia-northeast3-docker.pkg.dev
-
-          # Docker Tag
           DOCKER_TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/poppet-api:${{ github.sha }}"
-
-          # 빌드 (Dockerfile이 . 에 위치)
-          docker build --tag "${DOCKER_TAG}" .
-
-          # 푸시
+          docker build \
+            --build-arg AI_GEMINI_API_KEY=${{ secrets.AI_GEMINI_API_KEY }} \
+            --build-arg KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} \
+            --tag "${DOCKER_TAG}" .
           docker push "${DOCKER_TAG}"
 
       # 9) Cloud Run 배포
@@ -93,6 +89,7 @@ jobs:
           service: 'poppet-sol4-server'
           region: '${{ env.REGION }}'
           image: '${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/poppet-api:${{ github.sha }}'
+          # 여기서 추가 env_vars는 필요하지 않으므로 생략 (이미 Dockerfile에 환경 변수로 포함됨)
 
       # 10) 배포 후 URL 출력
       - name: 'Show output'
