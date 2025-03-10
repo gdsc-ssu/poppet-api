@@ -49,12 +49,18 @@ jobs:
         run: find . -name "*.jar"
 
       ################################################################
-      # 5) poppet-client.json 생성 (GitHub Secrets -> JSON 파일)
+      # 5-1) gemini-chat-prompt.txt 생성 (GitHub Secrets -> JSON 파일)
       ################################################################
+      # 5-2) poppet-client.json  파일 생성 (Secrets → 실제파일)
+      - name: Create gemini-chat-prompt.txt
+        run: echo "$GEMINI_CHAT_PROMPT" > gemini-chat-prompt.txt
+        env:
+          GEMINI_CHAT_PROMPT: ${{ secrets.GEMINI_CHAT_PROMPT }}
       - name: Create poppet-client.json
         run: echo "$GCP_CREDENTIALS_JSON" > poppet-client.json
         env:
           GCP_CREDENTIALS_JSON: ${{ secrets.GCP_CREDENTIALS_JSON }}
+
 
       # 6) Dockerfile 복호화 (Secrets에서 가져옴)
       - name: Decode Dockerfile from secret and save it
@@ -92,7 +98,8 @@ jobs:
             DB_PASSWORD=${{ secrets.DB_PASSWORD }},
             AI_GEMINI_API_KEY=${{ secrets.AI_GEMINI_API_KEY }},
             KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }},
-            GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+            GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }},
+            AI_GEMINI_PROMPT_LOCATION=${{ secrets.AI_GEMINI_PROMPT_LOCATION }}
 
       # 10) 배포 후 URL 출력
       - name: 'Show output'

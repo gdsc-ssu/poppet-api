@@ -27,6 +27,7 @@ ai:
   gemini:
     base-host: generativelanguage.googleapis.com
     key: ${AI_GEMINI_API_KEY}
+    location: ${AI_GEMINI_PROMPT_LOCATION}
 
 kakao:
   auth:
