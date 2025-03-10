@@ -76,13 +76,7 @@ jobs:
         run: |-
           gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://asia-northeast3-docker.pkg.dev
           DOCKER_TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/poppet-api:${{ github.sha }}"
-          docker build --build-arg DB_URL=${{ secrets.DB_URL }} \
-                 --build-arg DB_USERNAME=${{ secrets.DB_USERNAME }} \
-                 --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-                 --build-arg AI_GEMINI_API_KEY=${{ secrets.AI_GEMINI_API_KEY }} \
-                 --build-arg KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} \
-                 --build-arg GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} \
-                 --tag "$DOCKER_TAG" .
+          docker build --tag "${DOCKER_TAG}" .
           docker push "${DOCKER_TAG}"
 
       # 9) Cloud Run 배포
@@ -92,8 +86,13 @@ jobs:
           service: 'poppet-sol4-server'
           region: '${{ env.REGION }}'
           image: '${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/poppet-api:${{ github.sha }}'
-          # 여기서 추가 env_vars는 필요하지 않으므로 생략
-          # (이미 Dockerfile ARG/ENV로 주입했기 때문)
+          env_vars: >
+            DB_URL=${{ secrets.DB_URL }},
+            DB_USERNAME=${{ secrets.DB_USERNAME }},
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }},
+            AI_GEMINI_API_KEY=${{ secrets.AI_GEMINI_API_KEY }},
+            KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }},
+            GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
       # 10) 배포 후 URL 출력
       - name: 'Show output'
