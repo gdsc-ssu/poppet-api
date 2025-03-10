@@ -74,13 +74,15 @@ jobs:
       # 8) Docker 빌드 & 푸시
       - name: 'Build and Push Container'
         run: |-
-          # gcloud 인증 (추가)
           gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://asia-northeast3-docker.pkg.dev
-
           DOCKER_TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/poppet-api:${{ github.sha }}"
-
-          docker build --build-arg DB_URL=${{ secrets.DB_URL }} --build-arg DB_USERNAME=${{ secrets.DB_USERNAME }} --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }} --build-arg AI_GEMINI_API_KEY=${{ secrets.AI_GEMINI_API_KEY }} --build-arg KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} --build-arg GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} --tag "${DOCKER_TAG}" .
-
+          docker build --build-arg DB_URL=${{ secrets.DB_URL }} \
+                 --build-arg DB_USERNAME=${{ secrets.DB_USERNAME }} \
+                 --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+                 --build-arg AI_GEMINI_API_KEY=${{ secrets.AI_GEMINI_API_KEY }} \
+                 --build-arg KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} \
+                 --build-arg GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} \
+                 --tag "$DOCKER_TAG" .
           docker push "${DOCKER_TAG}"
 
       # 9) Cloud Run 배포
