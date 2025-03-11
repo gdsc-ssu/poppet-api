@@ -77,7 +77,6 @@ public class ChatServiceImpl implements ChatService {
         return requestText.toString();
     }
 
-    @Transactional
     public ChatRoom getChatRoom(User user) {
         LocalDate emailPeriodDate = LocalDate.now().minusDays(user.getEmailPeriod().getValue());
 
@@ -88,7 +87,7 @@ public class ChatServiceImpl implements ChatService {
                 : chatRooms.get(0);
 
         // 설정된 이메일 전송 기간 내에 생성되었다면 채팅방 유지
-        if (!chatRoom.getCreatedAt().toLocalDate().isBefore(emailPeriodDate)) {
+        if (chatRoom.isValidChatRoom(emailPeriodDate)) {
             return chatRoom;
         }
 
@@ -107,14 +106,15 @@ public class ChatServiceImpl implements ChatService {
         chatRoomRepository.save(newChatRoom);
 
         // 이전 chatRoom 제거
-        deleteRecentChats(newChatRoom);
+        deleteRecentChats(chatRoom.getChatRoomId());
 
         return newChatRoom;
     }
 
-    public void deleteRecentChats(ChatRoom chatRoom) {
-        chatRepository.deleteChatsByChatRoom(chatRoom);
-        chatRoomRepository.delete(chatRoom);
+//    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteRecentChats(Long chatRoomId) {
+        chatRepository.deleteChatsByChatRoomId(chatRoomId);
+        chatRoomRepository.deleteChatRoomByChatRoomId(chatRoomId);
     }
 
     private String parseChatSummaryRequest(ChatRoom chatRoom) {

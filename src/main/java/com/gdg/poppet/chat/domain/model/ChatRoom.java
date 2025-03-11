@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -29,4 +30,8 @@ public class ChatRoom extends BaseEntity {
 
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Chat> chats;
+
+    public boolean isValidChatRoom(LocalDate emailPeriodDate) {
+        return !getCreatedAt().toLocalDate().isBefore(emailPeriodDate);
+    }
 }

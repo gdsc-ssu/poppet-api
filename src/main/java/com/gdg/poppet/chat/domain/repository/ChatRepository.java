@@ -14,6 +14,6 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     @Modifying
     @Query("DELETE " +
             "FROM Chat c " +
-            "WHERE c.chatRoom = :chatRoom")
-    void deleteChatsByChatRoom(@Value("chatRoom") ChatRoom chatRoom);
+            "WHERE c.chatRoom.chatRoomId = :chatRoomId")
+    void deleteChatsByChatRoomId(@Value("chatRoomId") Long chatRoomId);
 }
