@@ -25,7 +25,7 @@ public class ChatRoom extends BaseEntity {
     @Column(name = "summary", nullable = true, length = 1000)
     private String summary;
 
-    private Long userId;     // user 간접 참조
+    private String username;   // TODO: user 간접 참조
 
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Chat> chats;

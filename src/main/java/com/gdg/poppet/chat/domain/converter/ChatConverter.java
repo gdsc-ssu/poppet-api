@@ -12,9 +12,10 @@ public class ChatConverter {
                 .build();
     }
 
-    public static ChatRoom toChatRoom(Long userId) {
+    public static ChatRoom toChatRoom(String username, String summary) {
         return ChatRoom.builder()
-                .userId(userId)
+                .username(username)
+                .summary(summary)
                 .build();
     }
 }

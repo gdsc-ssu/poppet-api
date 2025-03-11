@@ -8,5 +8,5 @@ import java.util.List;
 
 @Service
 public interface ChatService {
-    Resource chat(List<MultipartFile> message);
+    Resource chat(List<MultipartFile> message, String username);
 }
