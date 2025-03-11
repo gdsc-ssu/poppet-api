@@ -2,6 +2,7 @@ package com.gdg.poppet.user.domain.model;
 
 
 import com.gdg.poppet.global.domain.BaseEntity;
+import com.gdg.poppet.user.domain.enums.EmailPeriod;
 import com.gdg.poppet.user.domain.enums.Gender;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -31,6 +32,9 @@ public class User extends BaseEntity {
 
     @Column(name = "age", nullable = false)
     private int age;
+
+    @Column(name = "email_period", nullable = false)
+    private EmailPeriod emailPeriod;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Email> emails;
