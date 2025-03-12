@@ -48,7 +48,8 @@ public class GeminiService {
      * @param request 사용자의 대화 요청 텍스트
      * @return Gemini API의 응답값 중 TEXT Data
      */
-    public String generateAiResponse(String request) {
+    public String generateAiResponse(String summary, String request) {
+        request = "Summary="+summary+"/request="+request;
         GeminiRequestDto requestDto = getGeminiRequestDto(geminiChatPrompt, request);
         return post(requestDto);
     }

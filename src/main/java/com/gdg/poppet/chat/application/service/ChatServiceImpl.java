@@ -56,7 +56,7 @@ public class ChatServiceImpl implements ChatService {
         chatRepository.save(requestChat);
 
         // 4. Gemini를 이용해 응답 생성
-        String responseText = geminiService.generateAiResponse(requestText);
+        String responseText = geminiService.generateAiResponse(chatRoom.getSummary(), requestText);
         log.info("[*] responseText : {}", responseText);
 
         // 5. Chat 저장

@@ -15,7 +15,7 @@ public class ChatConverter {
     public static ChatRoom toChatRoom(String username, String summary) {
         return ChatRoom.builder()
                 .username(username)
-                .summary(summary)
+                .summary(summary == null ? "" : summary)
                 .build();
     }
 }
