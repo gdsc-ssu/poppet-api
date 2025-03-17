@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
   profiles:
     active: dev
   datasource:
@@ -27,7 +29,9 @@ ai:
   gemini:
     base-host: generativelanguage.googleapis.com
     key: ${AI_GEMINI_API_KEY}
-    location: ${AI_GEMINI_PROMPT_LOCATION}
+    location:
+      chat: ${AI_GEMINI_CHAT_PROMPT_LOCATION}
+      summary: ${AI_GEMINI_SUMMARY_PROMPT_LOCATION}
 
 kakao:
   auth:

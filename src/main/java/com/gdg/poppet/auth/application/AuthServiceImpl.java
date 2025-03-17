@@ -8,7 +8,6 @@ import com.gdg.poppet.user.application.dto.response.UserDto;
 import com.gdg.poppet.user.domain.model.User;
 import com.gdg.poppet.user.domain.repository.UserRepository;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

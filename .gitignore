@@ -37,6 +37,6 @@ out/
 ### VS Code ###
 .vscode/
 
-src/main/resources/application-secret.yml
 src/main/resources/poppet-client.json
 src/main/resources/gemini-chat-prompt.txt
+src/main/resources/gemini-summary-prompt.txt

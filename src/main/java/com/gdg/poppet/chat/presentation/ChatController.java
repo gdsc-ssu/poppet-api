@@ -25,14 +25,15 @@ public class ChatController {
     private final GeminiService geminiService;
 
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<Resource>> postChat( // TODO: NAMING
-            @RequestParam("chat") List<MultipartFile> requestChat
+    public ResponseEntity<ApiResponse<Resource>> postChat(
+            @RequestParam("chat") List<MultipartFile> requestChat,
+            @RequestParam("name") String name
     ){
-        return ApiResponse.success(SuccessStatus.CHAT_SUCCESS, chatService.chat(requestChat));
+        return ApiResponse.success(SuccessStatus.CHAT_SUCCESS, chatService.chat(requestChat, name));
     }
 
     @PostMapping("/test") // 대화 기능 테스트를 위한 임시 API
     public ResponseEntity<ApiResponse<String>> testChat(@RequestParam("chat") String chat) {
-        return ApiResponse.success(SuccessStatus.CHAT_SUCCESS, geminiService.generateAiResponse(chat));
+        return ApiResponse.success(SuccessStatus.CHAT_SUCCESS, geminiService.generateAiResponse("", chat));
     }
 }

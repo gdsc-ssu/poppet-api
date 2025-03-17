@@ -1,5 +1,6 @@
 package com.gdg.poppet.auth.domain.converter;
 
+import com.gdg.poppet.user.domain.enums.EmailPeriod;
 import com.gdg.poppet.user.domain.enums.Gender;
 import com.gdg.poppet.user.domain.model.User;
 
@@ -10,6 +11,7 @@ public class AuthConverter {
                 .username(username)
                 .gender(Gender.fromString(gender))
                 .age(age)
+                .emailPeriod(EmailPeriod.THREE)
                 .build();
     }
 
