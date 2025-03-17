@@ -103,7 +103,8 @@ jobs:
             AI_GEMINI_API_KEY=${{ secrets.AI_GEMINI_API_KEY }},
             KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }},
             GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }},
-            AI_GEMINI_PROMPT_LOCATION=${{ secrets.AI_GEMINI_PROMPT_LOCATION }}
+            AI_GEMINI_CHAT_PROMPT_LOCATION=${{ secrets.AI_GEMINI_CHAT_PROMPT_LOCATION }},
+            AI_GEMINI_SUMMARY_PROMPT_LOCATION=${{ secrets.AI_GEMINI_SUMMARY_PROMPT_LOCATION }}
 
       # 10) 배포 후 URL 출력
       - name: 'Show output'
