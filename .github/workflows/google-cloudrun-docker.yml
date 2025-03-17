@@ -57,9 +57,9 @@ jobs:
         env:
           GEMINI_CHAT_PROMPT: ${{ secrets.GEMINI_CHAT_PROMPT }}
       - name: Create gemini-summary-prompt.txt
-        run: echo "$GEMINI_CHAT_PROMPT" > gemini-summary-prompt.txt
+        run: echo "$GEMINI_SUMMARY_PROMPT" > gemini-summary-prompt.txt
         env:
-          GEMINI_CHAT_PROMPT: ${{ secrets.GEMINI_SUMMARY_PROMPT }}
+          GEMINI_SUMMARY_PROMPT: ${{ secrets.GEMINI_SUMMARY_PROMPT }}
       - name: Create poppet-client.json
         run: echo "$GCP_CREDENTIALS_JSON" > poppet-client.json
         env:
