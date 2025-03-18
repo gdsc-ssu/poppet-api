@@ -51,6 +51,7 @@ public class GoogleCloudService {
                             .setEncoding(RecognitionConfig.AudioEncoding.FLAC)
                             .setLanguageCode("ko-kR")
                             .setSampleRateHertz(44100)
+                            .setAudioChannelCount(2)
                             .build();
 
             // 해석된 결과 텍스트 반환
