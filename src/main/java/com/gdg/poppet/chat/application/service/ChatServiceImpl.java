@@ -40,7 +40,7 @@ public class ChatServiceImpl implements ChatService {
      */
     @Override
     @Transactional
-    public Resource chat(List<MultipartFile> requestFile, String username) {
+    public byte[] chat(List<MultipartFile> requestFile, String username) {
         // TODO: TRANSACTION 분리
 
         // 1. STT를 이용해 텍스트 추출

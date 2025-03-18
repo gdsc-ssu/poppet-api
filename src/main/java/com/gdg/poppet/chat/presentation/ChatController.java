@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -25,11 +26,12 @@ public class ChatController {
     private final GeminiService geminiService;
 
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<Resource>> postChat(
+    public ResponseEntity<ApiResponse<String>> postChat(
             @RequestParam("chat") List<MultipartFile> requestChat,
             @RequestParam("name") String name
     ){
-        return ApiResponse.success(SuccessStatus.CHAT_SUCCESS, chatService.chat(requestChat, name));
+        byte[] response = chatService.chat(requestChat, name);
+        return ApiResponse.success(SuccessStatus.CHAT_SUCCESS, Base64.getEncoder().encodeToString(response));
     }
 
     @PostMapping("/test") // 대화 기능 테스트를 위한 임시 API

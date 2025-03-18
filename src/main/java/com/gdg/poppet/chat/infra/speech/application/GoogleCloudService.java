@@ -77,7 +77,7 @@ public class GoogleCloudService {
      *
      * @param text 오디오 파일로 전환할 텍스트
      */
-    public Resource textToSpeech(String text) {
+    public byte[] textToSpeech(String text) {
 
         try {
             // 변환할 텍스트 설정
@@ -96,7 +96,7 @@ public class GoogleCloudService {
             SynthesizeSpeechResponse response = textToSpeechClient.synthesizeSpeech(input, voice, audioConfig);
             ByteString audioContents = response.getAudioContent();
 
-            return new ByteArrayResource(audioContents.toByteArray());
+            return new ByteArrayResource(audioContents.toByteArray()).getInputStream().readAllBytes();
         } catch (Exception e) {
             log.warn("[*] Google TTS 변환 중 오류 발생 : {}", e.getMessage());
             throw new RuntimeException(e);
