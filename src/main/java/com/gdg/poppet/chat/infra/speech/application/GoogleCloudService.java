@@ -49,7 +49,7 @@ public class GoogleCloudService {
             RecognitionConfig recognitionConfig =
                     RecognitionConfig.newBuilder()
                             .setEncoding(RecognitionConfig.AudioEncoding.FLAC)
-                            .setLanguageCode("ko-kR")
+                            .setLanguageCode("ko-KR")
                             .setSampleRateHertz(44100)
                             .setAudioChannelCount(2)
                             .build();
