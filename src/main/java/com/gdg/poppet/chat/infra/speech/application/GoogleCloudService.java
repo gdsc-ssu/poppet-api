@@ -50,6 +50,7 @@ public class GoogleCloudService {
                     RecognitionConfig.newBuilder()
                             .setEncoding(RecognitionConfig.AudioEncoding.FLAC)
                             .setLanguageCode("ko-kR")
+                            .setSampleRateHertz(44100)
                             .build();
 
             // 해석된 결과 텍스트 반환
@@ -93,10 +94,6 @@ public class GoogleCloudService {
             // 오디오 변환 결과
             SynthesizeSpeechResponse response = textToSpeechClient.synthesizeSpeech(input, voice, audioConfig);
             ByteString audioContents = response.getAudioContent();
-
-            try (OutputStream out = new FileOutputStream("output.mp3")) {
-                out.write(audioContents.toByteArray());
-            }
 
             return new ByteArrayResource(audioContents.toByteArray());
         } catch (Exception e) {
