@@ -18,6 +18,7 @@ public enum ErrorStatus implements BaseErrorStatus {
 
     // user
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "존재하지 않는 유저입니다."),
+    EMAIL_PERIOD_INVALID(HttpStatus.BAD_REQUEST, 400, "잘못된 이메일 전송 주기입니다."),
 
     // chat
     STT_FILE_IS_EMPTY(HttpStatus.BAD_REQUEST, 404, "음성 파일이 존재하지 않습니다.");
