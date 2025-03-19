@@ -1,10 +1,9 @@
 package com.gdg.poppet.auth.presentation;
 
-import com.gdg.poppet.auth.application.AuthService;
+import com.gdg.poppet.auth.application.service.AuthService;
 import com.gdg.poppet.global.response.ApiResponse;
 import com.gdg.poppet.global.status.SuccessStatus;
 import com.gdg.poppet.user.application.dto.response.UserDto;
-import com.gdg.poppet.user.domain.model.User;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

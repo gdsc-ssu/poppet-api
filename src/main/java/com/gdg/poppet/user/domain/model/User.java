@@ -39,4 +39,7 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Email> emails;
 
+    public void updateEmailPeriod(int emailPeriod) {
+        this.emailPeriod = EmailPeriod.fromValue(emailPeriod);
+    }
 }

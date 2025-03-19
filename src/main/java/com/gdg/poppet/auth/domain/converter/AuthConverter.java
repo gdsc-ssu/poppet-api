@@ -14,6 +14,4 @@ public class AuthConverter {
                 .emailPeriod(EmailPeriod.THREE)
                 .build();
     }
-
-
 }
