@@ -1,4 +1,4 @@
-package com.gdg.poppet.auth.application;
+package com.gdg.poppet.auth.application.service;
 
 import com.gdg.poppet.auth.application.dto.response.KakaoOAuthTokenDTO;
 import com.gdg.poppet.auth.application.dto.response.KakaoProfileDTO;

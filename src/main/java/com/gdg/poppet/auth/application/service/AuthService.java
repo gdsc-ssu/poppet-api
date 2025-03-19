@@ -1,4 +1,4 @@
-package com.gdg.poppet.auth.application;
+package com.gdg.poppet.auth.application.service;
 
 import com.gdg.poppet.user.application.dto.response.UserDto;
 import jakarta.servlet.http.HttpServletResponse;
