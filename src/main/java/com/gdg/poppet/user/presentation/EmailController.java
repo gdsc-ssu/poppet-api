@@ -2,6 +2,7 @@ package com.gdg.poppet.user.presentation;
 
 import com.gdg.poppet.global.response.ApiResponse;
 import com.gdg.poppet.global.status.SuccessStatus;
+import com.gdg.poppet.user.application.dto.request.EmailRequestDto;
 import com.gdg.poppet.user.application.dto.response.EmailDto;
 import com.gdg.poppet.user.application.dto.response.EmailPeriodDto;
 import com.gdg.poppet.user.application.service.EmailService;
@@ -41,11 +42,29 @@ public class EmailController {
     }
 
     @PostMapping("")
-    public ResponseEntity<ApiResponse<List<EmailDto>>> postEmailList(
+    public ResponseEntity<ApiResponse<List<EmailDto>>> postEmail(
             @RequestParam("name") String name,
-            @RequestParam("email") String email
+            @RequestBody EmailRequestDto emailDto
     ) {
-        emailService.postEmail(name, email);
-        return ApiResponse.success(SuccessStatus.POST_EMAIL_SUCCESS);
+        return ApiResponse.success(SuccessStatus.POST_EMAIL_SUCCESS, emailService.postEmail(name, emailDto));
+    }
+
+    @PatchMapping("/{emailId}")
+    public ResponseEntity<ApiResponse<String>> patchEmail(
+            @RequestParam("name") String name,
+            @PathVariable("emailId") Long emailId,
+            @RequestBody EmailRequestDto emailDto
+    ) {
+        emailService.patchEmail(name, emailId, emailDto);
+        return ApiResponse.success(SuccessStatus.PATCH_EMAIL_SUCCESS);
+    }
+
+    @DeleteMapping("/{emailId}")
+    public ResponseEntity<ApiResponse<String>> deleteEmail(
+            @RequestParam("name") String name,
+            @PathVariable("emailId") Long emailId
+    ) {
+        emailService.deleteEmail(name, emailId);
+        return ApiResponse.success(SuccessStatus.DELETE_EMAIL_SUCCESS);
     }
 }
