@@ -19,7 +19,10 @@ spring:
     show-sql: true
     properties:
       format_sql: true
-
+  servlet:
+    multipart:
+      max-file-size: 7MB
+      max-request-size: 7MB
   cloud:
     gcp:
       credentials:
