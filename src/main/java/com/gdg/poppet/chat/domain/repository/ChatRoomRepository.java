@@ -24,4 +24,11 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
             "FROM ChatRoom cr " +
             "WHERE cr.chatRoomId = :chatRoomId")
     void deleteChatRoomByChatRoomId(@Param(value = "chatRoomId") Long chatRoomId);
+
+    @Query(value = "SELECT cr " +
+            "FROM ChatRoom cr " +
+            "WHERE cr.username = :username " +
+            "AND cr.isMailSent = FALSE " +
+            "ORDER BY cr.createdAt DESC")
+    List<ChatRoom> findByUsernameAndCreatedAtAndIsMailSent(@Param(value = "username") String username);
 }

@@ -67,4 +67,13 @@ public class EmailController {
         emailService.deleteEmailAddress(name, emailId);
         return ApiResponse.success(SuccessStatus.DELETE_EMAIL_SUCCESS);
     }
+
+    @GetMapping("/send")
+    public ResponseEntity<ApiResponse<EmailDto>> sendEmail(
+            @RequestParam("name") String name
+    ) {
+        emailService.sendEmail(name);
+        // TODO: 이메일 발송 후 response 수정
+        return ApiResponse.success(SuccessStatus.OK);
+    }
 }
