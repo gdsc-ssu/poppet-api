@@ -58,7 +58,7 @@ public class EmailServiceImpl implements EmailService {
      * @return 사용자가 등록한 보호자 이메일 리스트
      */
     @Override
-    public List<EmailDto> getEmailList(String username) {
+    public List<EmailDto> getEmailAddressList(String username) {
         User user = getUser(username);
         List<Email> emailList = emailRepository.findByUser(user);
 
@@ -76,7 +76,7 @@ public class EmailServiceImpl implements EmailService {
      */
     @Transactional
     @Override
-    public List<EmailDto> postEmail(String username, EmailRequestDto emailRequestDto) {
+    public List<EmailDto> postEmailAddress(String username, EmailRequestDto emailRequestDto) {
         User user = getUser(username);
 
         validateDuplicateEmail(emailRequestDto.getNewEmail(), user);
@@ -103,7 +103,7 @@ public class EmailServiceImpl implements EmailService {
      */
     @Transactional
     @Override
-    public void patchEmail(String username, Long emailId, EmailRequestDto emailRequestDto) {
+    public void patchEmailAddress(String username, Long emailId, EmailRequestDto emailRequestDto) {
         User user = getUser(username);
         Email email = getEmail(emailId);
 
@@ -123,7 +123,7 @@ public class EmailServiceImpl implements EmailService {
      */
     @Transactional
     @Override
-    public void deleteEmail(String username, Long emailId) {
+    public void deleteEmailAddress(String username, Long emailId) {
         User user = getUser(username);
         Email email = getEmail(emailId);
         validateIsUserAuthorizedForEmail(user, email);

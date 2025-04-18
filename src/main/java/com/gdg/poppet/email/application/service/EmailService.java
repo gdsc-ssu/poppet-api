@@ -12,8 +12,8 @@ public interface EmailService {
     EmailPeriodDto getEmailPeriod(String name);
     EmailPeriodDto patchEmailPeriod(String name, int period);
 
-    List<EmailDto> getEmailList(String name);
-    List<EmailDto> postEmail(String name, EmailRequestDto emailRequestDto);
-    void patchEmail(String name, Long emailId, EmailRequestDto emailRequestDto);
-    void deleteEmail(String name, Long emailId);
+    List<EmailDto> getEmailAddressList(String name);
+    List<EmailDto> postEmailAddress(String name, EmailRequestDto emailRequestDto);
+    void patchEmailAddress(String name, Long emailId, EmailRequestDto emailRequestDto);
+    void deleteEmailAddress(String name, Long emailId);
 }
