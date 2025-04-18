@@ -10,6 +10,7 @@ import java.io.IOException;
 public class ContentStream {
     private PDPageContentStream pageContentStream;
     private PDFont font;
+    private float fontSpace;
 
     public ContentStream(PDPageContentStream pageContentStream, PDFont font) {
         this.pageContentStream = pageContentStream;
@@ -19,6 +20,7 @@ public class ContentStream {
     public void setFontSize(int fontSize){
         try {
             pageContentStream.setFont(font, fontSize);
+            this.fontSpace = (float)(fontSize + 2)/2;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -35,7 +37,7 @@ public class ContentStream {
     public void writeText(float x, float y, String text){
         try {
             pageContentStream.beginText();
-            pageContentStream.newLineAtOffset(x, y);
+            pageContentStream.newLineAtOffset(x, y + fontSpace);
             pageContentStream.showText(text);
             pageContentStream.endText();
         } catch (IOException e) {

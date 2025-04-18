@@ -26,6 +26,7 @@ import java.time.format.DateTimeFormatter;
 public class EmailTemplateService {
 
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private final int fontSize = 18;
 
     public ByteArrayResource makeEmailBackground(User user, ChatRoom chatRoom) {
         // 배경용 PDF 파일 로드
@@ -74,7 +75,7 @@ public class EmailTemplateService {
             PDFont font = PDType0Font.load(doc, fontFile);
 
             ContentStream contentStream = new ContentStream(pageContentStream, font);
-            contentStream.setFontSize(18);
+            contentStream.setFontSize(fontSize);
             contentStream.setColor(0.3f, 0.3f, 0.3f);
 
             drawUserInfo(contentStream, user.getUsername(), user.getEmailPeriod().getValue());
@@ -93,8 +94,8 @@ public class EmailTemplateService {
         int periodX = 343;
         int periodY = 522;
 
-        contentStream.writeText(nameX, nameY + 9, username);
-        contentStream.writeText(periodX, periodY + 9, emailPeriod + "일");
+        contentStream.writeText(nameX, nameY, username);
+        contentStream.writeText(periodX, periodY, emailPeriod + "일");
     }
 
     private void drawDateTime(ContentStream contentStream, LocalDateTime createdAt) {
@@ -102,8 +103,8 @@ public class EmailTemplateService {
         int createdAtY = 488;
         int nowY = 454;
 
-        contentStream.writeText(createdAtX, createdAtY + 10, dateTimeFormatter.format(createdAt));
-        contentStream.writeText(createdAtX, nowY + 10, dateTimeFormatter.format(LocalDateTime.now()));
+        contentStream.writeText(createdAtX, createdAtY, dateTimeFormatter.format(createdAt));
+        contentStream.writeText(createdAtX, nowY, dateTimeFormatter.format(LocalDateTime.now()));
     }
 
     private void drawSummary(ContentStream contentStream, String summary) {
@@ -113,7 +114,7 @@ public class EmailTemplateService {
         int summaryY = 299;
 
         // TODO: 줄바꿈
-        contentStream.writeText(summaryX, summaryY + 9, summary.substring(0, 9));
+        contentStream.writeText(summaryX, summaryY, summary.substring(0, 9));
     }
 
     private PDDocument loadPDDocument(String path){
