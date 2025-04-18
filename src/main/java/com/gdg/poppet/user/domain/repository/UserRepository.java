@@ -1,6 +1,8 @@
 package com.gdg.poppet.user.domain.repository;
 
 import com.gdg.poppet.user.domain.model.User;
+
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,4 +21,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "JOIN FETCH u.emails el " +
             "WHERE u.username = :username" )
     Optional<User> findByUsername(String username);
+
+    @Query("SELECT u " +
+            "FROM User u " +
+            "JOIN FETCH u.emails el ")
+    List<User> findAll();
 }

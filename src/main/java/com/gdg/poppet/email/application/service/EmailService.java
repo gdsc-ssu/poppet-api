@@ -17,5 +17,5 @@ public interface EmailService {
     void patchEmailAddress(String name, Long emailId, EmailRequestDto emailRequestDto);
     void deleteEmailAddress(String name, Long emailId);
 
-    void sendEmail(String username);
+    void sendEmail();
 }
