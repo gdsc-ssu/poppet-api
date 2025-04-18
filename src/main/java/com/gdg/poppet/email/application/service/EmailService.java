@@ -16,4 +16,6 @@ public interface EmailService {
     List<EmailDto> postEmailAddress(String name, EmailRequestDto emailRequestDto);
     void patchEmailAddress(String name, Long emailId, EmailRequestDto emailRequestDto);
     void deleteEmailAddress(String name, Long emailId);
+
+    void sendEmail(String username);
 }
