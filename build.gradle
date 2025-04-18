@@ -50,6 +50,8 @@ dependencies {
 
 	// email
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'org.apache.pdfbox:pdfbox:2.0.29'
+	implementation 'org.apache.pdfbox:pdfbox-tools:2.0.29'
 }
 
 dependencyManagement {
