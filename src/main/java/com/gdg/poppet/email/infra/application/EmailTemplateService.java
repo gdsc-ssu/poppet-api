@@ -19,6 +19,8 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -109,12 +111,25 @@ public class EmailTemplateService {
 
     private void drawSummary(ContentStream contentStream, String summary) {
         contentStream.setFontSize(16);
-
         int summaryX = 215;
         int summaryY = 299;
+        int lineHeight = 50;
+        int maxChars = 45;
 
-        // TODO: 줄바꿈
-        contentStream.writeText(summaryX, summaryY, summary.substring(0, 9));
+        // 개행문자 제거
+        StringBuilder summaryStringBuilder = new StringBuilder();
+        for (String line : summary.split("\n")) {
+            summaryStringBuilder.append(line);
+        }
+        String summaryLine = summaryStringBuilder.toString();
+
+        // 45자 단위로 문장 분리
+        List<String> texts = new ArrayList<>();
+        for (int start = 0; start < summaryLine.length(); start += maxChars) {
+            int end = Math.min(summaryLine.length(), start + maxChars);
+            texts.add(summaryLine.substring(start, end));
+        }
+        contentStream.writeWrappedText(summaryX, summaryY, lineHeight, texts);
     }
 
     private PDDocument loadPDDocument(String path){

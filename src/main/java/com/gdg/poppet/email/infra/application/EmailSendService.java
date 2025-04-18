@@ -26,7 +26,7 @@ public class EmailSendService {
         mimeMessageHelper.setSubject(subject);
 
         // image 배경 설정
-        mimeMessageHelper.setText("<html><body><img src='cid:image' style='width:1200px; height:auto;'/></body></html>", true);
+        mimeMessageHelper.setText("<html><body><img src='cid:image' style='width:800px; height:auto;'/></body></html>", true);
         mimeMessageHelper.addInline("image", body, "image/png");
 
         // mail 전송

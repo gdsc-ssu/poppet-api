@@ -5,6 +5,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 
 import java.io.IOException;
+import java.util.List;
 
 @Getter
 public class ContentStream {
@@ -39,6 +40,20 @@ public class ContentStream {
             pageContentStream.beginText();
             pageContentStream.newLineAtOffset(x, y + fontSpace);
             pageContentStream.showText(text);
+            pageContentStream.endText();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void writeWrappedText(float x, float y, int lineHeight, List<String> texts){
+        try {
+            pageContentStream.beginText();
+            pageContentStream.newLineAtOffset(x, y + fontSpace);
+            for (String text : texts) {
+                pageContentStream.showText(text);
+                pageContentStream.newLineAtOffset(0, -lineHeight);
+            }
             pageContentStream.endText();
         } catch (IOException e) {
             throw new RuntimeException(e);
