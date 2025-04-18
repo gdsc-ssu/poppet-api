@@ -1,11 +1,11 @@
-package com.gdg.poppet.user.presentation;
+package com.gdg.poppet.email.presentation;
 
 import com.gdg.poppet.global.response.ApiResponse;
 import com.gdg.poppet.global.status.SuccessStatus;
-import com.gdg.poppet.user.application.dto.request.EmailRequestDto;
-import com.gdg.poppet.user.application.dto.response.EmailDto;
-import com.gdg.poppet.user.application.dto.response.EmailPeriodDto;
-import com.gdg.poppet.user.application.service.EmailService;
+import com.gdg.poppet.email.application.dto.request.EmailRequestDto;
+import com.gdg.poppet.email.application.dto.response.EmailDto;
+import com.gdg.poppet.email.application.dto.response.EmailPeriodDto;
+import com.gdg.poppet.email.application.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

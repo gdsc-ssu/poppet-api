@@ -1,8 +1,8 @@
-package com.gdg.poppet.user.application.service;
+package com.gdg.poppet.email.application.service;
 
-import com.gdg.poppet.user.application.dto.request.EmailRequestDto;
-import com.gdg.poppet.user.application.dto.response.EmailDto;
-import com.gdg.poppet.user.application.dto.response.EmailPeriodDto;
+import com.gdg.poppet.email.application.dto.request.EmailRequestDto;
+import com.gdg.poppet.email.application.dto.response.EmailDto;
+import com.gdg.poppet.email.application.dto.response.EmailPeriodDto;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -1,6 +1,6 @@
-package com.gdg.poppet.user.domain.repository;
+package com.gdg.poppet.email.domain.repository;
 
-import com.gdg.poppet.user.domain.model.Email;
+import com.gdg.poppet.email.domain.model.Email;
 import com.gdg.poppet.user.domain.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

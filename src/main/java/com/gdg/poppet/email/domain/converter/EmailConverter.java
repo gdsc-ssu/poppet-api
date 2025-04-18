@@ -1,8 +1,8 @@
-package com.gdg.poppet.user.domain.converter;
+package com.gdg.poppet.email.domain.converter;
 
-import com.gdg.poppet.user.application.dto.response.EmailDto;
-import com.gdg.poppet.user.application.dto.response.EmailPeriodDto;
-import com.gdg.poppet.user.domain.model.Email;
+import com.gdg.poppet.email.application.dto.response.EmailDto;
+import com.gdg.poppet.email.application.dto.response.EmailPeriodDto;
+import com.gdg.poppet.email.domain.model.Email;
 import com.gdg.poppet.user.domain.model.User;
 
 public class EmailConverter {

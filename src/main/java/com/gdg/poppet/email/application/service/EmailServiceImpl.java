@@ -1,14 +1,14 @@
-package com.gdg.poppet.user.application.service;
+package com.gdg.poppet.email.application.service;
 
 import com.gdg.poppet.global.exception.GlobalException;
 import com.gdg.poppet.global.status.ErrorStatus;
-import com.gdg.poppet.user.application.dto.request.EmailRequestDto;
-import com.gdg.poppet.user.application.dto.response.EmailDto;
-import com.gdg.poppet.user.application.dto.response.EmailPeriodDto;
-import com.gdg.poppet.user.domain.converter.EmailConverter;
-import com.gdg.poppet.user.domain.model.Email;
+import com.gdg.poppet.email.application.dto.request.EmailRequestDto;
+import com.gdg.poppet.email.application.dto.response.EmailDto;
+import com.gdg.poppet.email.application.dto.response.EmailPeriodDto;
+import com.gdg.poppet.email.domain.converter.EmailConverter;
+import com.gdg.poppet.email.domain.model.Email;
 import com.gdg.poppet.user.domain.model.User;
-import com.gdg.poppet.user.domain.repository.EmailRepository;
+import com.gdg.poppet.email.domain.repository.EmailRepository;
 import com.gdg.poppet.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

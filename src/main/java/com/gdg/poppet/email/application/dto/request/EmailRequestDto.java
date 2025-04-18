@@ -1,4 +1,4 @@
-package com.gdg.poppet.user.application.dto.request;
+package com.gdg.poppet.email.application.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

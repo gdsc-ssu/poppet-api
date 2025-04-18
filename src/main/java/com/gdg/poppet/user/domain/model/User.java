@@ -1,8 +1,9 @@
 package com.gdg.poppet.user.domain.model;
 
 
+import com.gdg.poppet.email.domain.model.Email;
 import com.gdg.poppet.global.domain.BaseEntity;
-import com.gdg.poppet.user.domain.enums.EmailPeriod;
+import com.gdg.poppet.email.domain.enums.EmailPeriod;
 import com.gdg.poppet.user.domain.enums.Gender;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

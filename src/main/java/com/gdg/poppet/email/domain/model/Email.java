@@ -1,6 +1,7 @@
-package com.gdg.poppet.user.domain.model;
+package com.gdg.poppet.email.domain.model;
 
 import com.gdg.poppet.global.domain.BaseEntity;
+import com.gdg.poppet.user.domain.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
