@@ -18,14 +18,14 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class EmailSendEventListener {
 
     private final EmailSendService emailSendService;
-    private final EmailTemplateService emailTemplateService;
+    private final EmailTemplateGenerator emailTemplateGenerator;
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleEmailSendEvent(EmailSendEvent event) {
         User user = event.getUser();
         ChatRoom chatRoom = event.getChatRoom();
-        ByteArrayResource body = emailTemplateService.makeEmailBackground(user, chatRoom);
+        ByteArrayResource body = emailTemplateGenerator.makeEmailBackground(user, chatRoom);
 
         for (Email email : user.getEmails()) {
             try {

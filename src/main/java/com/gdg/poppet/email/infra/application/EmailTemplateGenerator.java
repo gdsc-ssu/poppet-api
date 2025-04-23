@@ -25,7 +25,7 @@ import java.util.List;
 @Slf4j
 @Component
 @NoArgsConstructor
-public class EmailTemplateService {
+public class EmailTemplateGenerator {
 
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final int fontSize = 18;
