@@ -47,6 +47,9 @@ dependencies {
 
 	//.env
 	implementation 'io.github.cdimascio:java-dotenv:5.2.2'
+
+	// email
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
 }
 
 dependencyManagement {

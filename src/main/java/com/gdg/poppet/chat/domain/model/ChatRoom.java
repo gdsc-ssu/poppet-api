@@ -28,10 +28,17 @@ public class ChatRoom extends BaseEntity {
 
     private String username;   // TODO: user 간접 참조
 
+    @Column(name = "is_mail_sent", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+    private boolean isMailSent;
+
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Chat> chats;
 
     public boolean isValidChatRoom(LocalDate emailPeriodDate) {
         return !getCreatedAt().toLocalDate().isBefore(emailPeriodDate);
+    }
+
+    public void updateIsMailSent() {
+        isMailSent = true;
     }
 }

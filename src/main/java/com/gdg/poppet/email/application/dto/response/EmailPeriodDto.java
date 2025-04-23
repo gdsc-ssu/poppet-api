@@ -1,4 +1,4 @@
-package com.gdg.poppet.user.application.dto.response;
+package com.gdg.poppet.email.application.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-public class EmailDto {
-    private Long emailId;
-    private String emailAddress;
+public class EmailPeriodDto {
+    private int period;
 }

@@ -1,4 +1,4 @@
-package com.gdg.poppet.user.domain.enums;
+package com.gdg.poppet.email.domain.enums;
 
 import com.gdg.poppet.global.exception.GlobalException;
 import com.gdg.poppet.global.status.ErrorStatus;

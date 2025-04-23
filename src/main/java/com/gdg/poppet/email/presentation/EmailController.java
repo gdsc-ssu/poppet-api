@@ -1,11 +1,11 @@
-package com.gdg.poppet.user.presentation;
+package com.gdg.poppet.email.presentation;
 
 import com.gdg.poppet.global.response.ApiResponse;
 import com.gdg.poppet.global.status.SuccessStatus;
-import com.gdg.poppet.user.application.dto.request.EmailRequestDto;
-import com.gdg.poppet.user.application.dto.response.EmailDto;
-import com.gdg.poppet.user.application.dto.response.EmailPeriodDto;
-import com.gdg.poppet.user.application.service.EmailService;
+import com.gdg.poppet.email.application.dto.request.EmailRequestDto;
+import com.gdg.poppet.email.application.dto.response.EmailDto;
+import com.gdg.poppet.email.application.dto.response.EmailPeriodDto;
+import com.gdg.poppet.email.application.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +38,7 @@ public class EmailController {
     public ResponseEntity<ApiResponse<List<EmailDto>>> getEmailList(
             @RequestParam("name") String name
     ) {
-        return ApiResponse.success(SuccessStatus.GET_EMAIL_LIST_SUCCESS, emailService.getEmailList(name));
+        return ApiResponse.success(SuccessStatus.GET_EMAIL_LIST_SUCCESS, emailService.getEmailAddressList(name));
     }
 
     @PostMapping("")
@@ -46,7 +46,7 @@ public class EmailController {
             @RequestParam("name") String name,
             @RequestBody EmailRequestDto emailDto
     ) {
-        return ApiResponse.success(SuccessStatus.POST_EMAIL_SUCCESS, emailService.postEmail(name, emailDto));
+        return ApiResponse.success(SuccessStatus.POST_EMAIL_SUCCESS, emailService.postEmailAddress(name, emailDto));
     }
 
     @PatchMapping("/{emailId}")
@@ -55,7 +55,7 @@ public class EmailController {
             @PathVariable("emailId") Long emailId,
             @RequestBody EmailRequestDto emailDto
     ) {
-        emailService.patchEmail(name, emailId, emailDto);
+        emailService.patchEmailAddress(name, emailId, emailDto);
         return ApiResponse.success(SuccessStatus.PATCH_EMAIL_SUCCESS);
     }
 
@@ -64,7 +64,16 @@ public class EmailController {
             @RequestParam("name") String name,
             @PathVariable("emailId") Long emailId
     ) {
-        emailService.deleteEmail(name, emailId);
+        emailService.deleteEmailAddress(name, emailId);
         return ApiResponse.success(SuccessStatus.DELETE_EMAIL_SUCCESS);
+    }
+
+    @GetMapping("/send")
+    public ResponseEntity<ApiResponse<EmailDto>> sendEmail(
+            @RequestParam("name") String name
+    ) {
+        emailService.sendEmail(name);
+        // TODO: 이메일 발송 후 response 수정
+        return ApiResponse.success(SuccessStatus.OK);
     }
 }
