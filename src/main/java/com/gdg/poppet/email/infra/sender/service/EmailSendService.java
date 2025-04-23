@@ -1,4 +1,4 @@
-package com.gdg.poppet.email.infra.application;
+package com.gdg.poppet.email.infra.sender.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

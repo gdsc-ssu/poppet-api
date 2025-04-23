@@ -1,8 +1,10 @@
-package com.gdg.poppet.email.infra.application;
+package com.gdg.poppet.email.infra.sender.listener;
 
 import com.gdg.poppet.chat.domain.model.ChatRoom;
 import com.gdg.poppet.email.application.event.EmailSendEvent;
 import com.gdg.poppet.email.domain.model.Email;
+import com.gdg.poppet.email.infra.sender.service.EmailSendService;
+import com.gdg.poppet.email.infra.template.EmailTemplateGenerator;
 import com.gdg.poppet.user.domain.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
