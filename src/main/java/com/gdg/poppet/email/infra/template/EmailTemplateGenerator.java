@@ -1,6 +1,9 @@
-package com.gdg.poppet.email.infra.application;
+package com.gdg.poppet.email.infra.template;
 
 import com.gdg.poppet.chat.domain.model.ChatRoom;
+import com.gdg.poppet.email.infra.template.v1.TemplateV1;
+import com.gdg.poppet.email.infra.template.v1.TemplateV1Config;
+import com.gdg.poppet.email.infra.template.v1.TemplateV1Pos;
 import com.gdg.poppet.user.domain.model.User;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,14 +28,14 @@ import java.util.List;
 @Slf4j
 @Component
 @NoArgsConstructor
-public class EmailTemplateService {
+public class EmailTemplateGenerator {
 
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private final int fontSize = 18;
+    private final TemplateV1Config templateV1Config = new TemplateV1().getConfig();
 
     public ByteArrayResource makeEmailBackground(User user, ChatRoom chatRoom) {
         // 배경용 PDF 파일 로드
-        PDDocument doc = loadPDDocument("email/email_background.pdf");
+        PDDocument doc = loadPDDocument("email/" + templateV1Config.BACKGROUND_FILE_NAME());
 
         // 배경용 PDF 편집
         drawBackgroundImg(doc, user, chatRoom);
@@ -73,12 +76,10 @@ public class EmailTemplateService {
 
         try {
             PDPageContentStream pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, true, true);
-            InputStream fontFile = loadFontFile("fonts/Pretendard.ttf");
+            InputStream fontFile = loadFontFile("fonts/" + templateV1Config.FONT_NAME());
             PDFont font = PDType0Font.load(doc, fontFile);
 
             ContentStream contentStream = new ContentStream(pageContentStream, font);
-            contentStream.setFontSize(fontSize);
-            contentStream.setColor(0.3f, 0.3f, 0.3f);
 
             drawUserInfo(contentStream, user.getUsername(), user.getEmailPeriod().getValue());
             drawDateTime(contentStream, chatRoom.getCreatedAt());
@@ -91,30 +92,21 @@ public class EmailTemplateService {
     }
 
     private void drawUserInfo(ContentStream contentStream, String username, int emailPeriod) {
-        int nameX = 273;
-        int nameY = 556;
-        int periodX = 343;
-        int periodY = 522;
+        contentStream.setFontSize(TemplateV1Pos.USERNAME.fontSize);
+        contentStream.setColor(TemplateV1Pos.USERNAME.color);
 
-        contentStream.writeText(nameX, nameY, username);
-        contentStream.writeText(periodX, periodY, emailPeriod + "일");
+        contentStream.writeText(TemplateV1Pos.USERNAME.x, TemplateV1Pos.USERNAME.y, username);
+        contentStream.writeText(TemplateV1Pos.EMAIL_PERIOD.x, TemplateV1Pos.EMAIL_PERIOD.y, emailPeriod + "일");
     }
 
     private void drawDateTime(ContentStream contentStream, LocalDateTime createdAt) {
-        int createdAtX = 308;
-        int createdAtY = 488;
-        int nowY = 454;
-
-        contentStream.writeText(createdAtX, createdAtY, dateTimeFormatter.format(createdAt));
-        contentStream.writeText(createdAtX, nowY, dateTimeFormatter.format(LocalDateTime.now()));
+        contentStream.writeText(TemplateV1Pos.CREATED_AT.x, TemplateV1Pos.CREATED_AT.y, dateTimeFormatter.format(createdAt));
+        contentStream.writeText(TemplateV1Pos.NOW.x, TemplateV1Pos.NOW.y, dateTimeFormatter.format(LocalDateTime.now()));
     }
 
     private void drawSummary(ContentStream contentStream, String summary) {
-        contentStream.setFontSize(16);
-        int summaryX = 215;
-        int summaryY = 299;
-        int lineHeight = 50;
-        int maxChars = 45;
+        contentStream.setFontSize(TemplateV1Pos.SUMMARY.fontSize);
+        contentStream.setColor(TemplateV1Pos.SUMMARY.color);
 
         // 개행문자 제거
         StringBuilder summaryStringBuilder = new StringBuilder();
@@ -123,13 +115,13 @@ public class EmailTemplateService {
         }
         String summaryLine = summaryStringBuilder.toString();
 
-        // 45자 단위로 문장 분리
+        // 글자수 단위로 문장 분리
         List<String> texts = new ArrayList<>();
-        for (int start = 0; start < summaryLine.length(); start += maxChars) {
-            int end = Math.min(summaryLine.length(), start + maxChars);
-            texts.add(summaryLine.substring(start, end));
+        for (int start = 0; start < summaryLine.length(); start += templateV1Config.MAX_CHARS_IN_LINE()) {
+            int end = Math.min(summaryLine.length(), start + templateV1Config.MAX_CHARS_IN_LINE());
+            texts.add(summaryLine.substring(start, end).strip());
         }
-        contentStream.writeWrappedText(summaryX, summaryY, lineHeight, texts);
+        contentStream.writeWrappedText(TemplateV1Pos.SUMMARY.x, TemplateV1Pos.SUMMARY.y, templateV1Config.LINE_HEIGHT(), texts);
     }
 
     private PDDocument loadPDDocument(String path){

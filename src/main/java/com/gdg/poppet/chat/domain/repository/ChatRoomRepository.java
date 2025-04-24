@@ -30,5 +30,5 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
             "WHERE cr.username = :username " +
             "AND cr.isMailSent = FALSE " +
             "ORDER BY cr.createdAt DESC")
-    List<ChatRoom> findByUsernameAndCreatedAtAndIsMailSent(@Param(value = "username") String username);
+    List<ChatRoom> findByUsernameAndCreatedAtAndNotMailSent(@Param(value = "username") String username);
 }

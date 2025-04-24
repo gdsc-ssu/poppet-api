@@ -3,7 +3,6 @@ package com.gdg.poppet.email.application.service;
 import com.gdg.poppet.chat.domain.model.ChatRoom;
 import com.gdg.poppet.chat.domain.repository.ChatRoomRepository;
 import com.gdg.poppet.email.application.event.EmailSendEvent;
-import com.gdg.poppet.email.infra.application.EmailSendService;
 import com.gdg.poppet.global.exception.GlobalException;
 import com.gdg.poppet.global.status.ErrorStatus;
 import com.gdg.poppet.email.application.dto.request.EmailRequestDto;
@@ -31,7 +30,6 @@ public class EmailServiceImpl implements EmailService {
     private final UserRepository userRepository;
     private final EmailRepository emailRepository;
     private final ChatRoomRepository chatRoomRepository;
-    private final EmailSendService emailSendService;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     /**
@@ -146,24 +144,24 @@ public class EmailServiceImpl implements EmailService {
      */
     @Transactional
     @Override
-    public void sendEmail(String username) {
-        // TODO: user data 얻는 과정 수정
-        User user = getUser(username);
+    public void sendEmail() {
+        for (User user : userRepository.findAll()) {
 
-        // 가장 최근 생성되고 메일을 보내지 않은 채팅방 조회
-        List<ChatRoom> chatRooms = chatRoomRepository.findByUsernameAndCreatedAtAndIsMailSent(username);
-        if (chatRooms.isEmpty()) return;
+            // 가장 최근 생성되고 메일을 보내지 않은 채팅방 조회
+            List<ChatRoom> chatRooms = chatRoomRepository.findByUsernameAndCreatedAtAndNotMailSent(user.getUsername());
+            if (chatRooms.isEmpty()) return;
 
-        // 메일 보낼 채팅방 요약 내용 추출
-        ChatRoom chatRoom = chatRooms.get(0);
-        String chatSummary = chatRoom.getSummary();
-        if (chatSummary == null) return;
+            // 메일 보낼 채팅방 요약 내용 추출
+            ChatRoom chatRoom = chatRooms.get(0);
+            String chatSummary = chatRoom.getSummary();
+            if (chatSummary == null) return;
 
-        // 메일 보냄 여부 수정
-        chatRoom.updateIsMailSent();
+            // 메일 보냄 여부 수정
+            chatRoom.updateIsMailSent();
 
-        // 메일 전송 이벤트 발행
-        applicationEventPublisher.publishEvent(new EmailSendEvent(user, chatRoom));
+            // 메일 전송 이벤트 발행
+            applicationEventPublisher.publishEvent(new EmailSendEvent(user, chatRoom));
+        }
     }
 
     private void validateIsUserAuthorizedForEmail(User user, Email email) {

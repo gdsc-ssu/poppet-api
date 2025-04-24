@@ -1,5 +1,6 @@
-package com.gdg.poppet.email.infra.application;
+package com.gdg.poppet.email.infra.template;
 
+import com.gdg.poppet.email.infra.template.v1.RGB;
 import lombok.Getter;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDFont;
@@ -27,9 +28,9 @@ public class ContentStream {
         }
     }
 
-    public void setColor(float r, float g, float b){
+    public void setColor(RGB rgb){
         try {
-            this.pageContentStream.setNonStrokingColor(r, g, b);
+            this.pageContentStream.setNonStrokingColor(rgb.r(), rgb.g(), rgb.b());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

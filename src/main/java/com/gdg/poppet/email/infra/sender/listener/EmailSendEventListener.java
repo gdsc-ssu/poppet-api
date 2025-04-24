@@ -1,8 +1,10 @@
-package com.gdg.poppet.email.infra.application;
+package com.gdg.poppet.email.infra.sender.listener;
 
 import com.gdg.poppet.chat.domain.model.ChatRoom;
 import com.gdg.poppet.email.application.event.EmailSendEvent;
 import com.gdg.poppet.email.domain.model.Email;
+import com.gdg.poppet.email.infra.sender.service.EmailSendService;
+import com.gdg.poppet.email.infra.template.EmailTemplateGenerator;
 import com.gdg.poppet.user.domain.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,14 +20,14 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class EmailSendEventListener {
 
     private final EmailSendService emailSendService;
-    private final EmailTemplateService emailTemplateService;
+    private final EmailTemplateGenerator emailTemplateGenerator;
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleEmailSendEvent(EmailSendEvent event) {
         User user = event.getUser();
         ChatRoom chatRoom = event.getChatRoom();
-        ByteArrayResource body = emailTemplateService.makeEmailBackground(user, chatRoom);
+        ByteArrayResource body = emailTemplateGenerator.makeEmailBackground(user, chatRoom);
 
         for (Email email : user.getEmails()) {
             try {
