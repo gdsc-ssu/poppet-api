@@ -35,14 +35,10 @@ public class AuthServiceImpl implements AuthService {
         return UserDto.of(user.getUsername());
     }
 
-
     private User createNewUser(KakaoProfileDTO kakaoProfile) {
-        User newUser = AuthConverter.toUser(
-                kakaoProfile.getId(),
-                kakaoProfile.getKakaoAccount().getName(),
-                kakaoProfile.getKakaoAccount().getGender(),
-                getEstimatedAge(kakaoProfile.getKakaoAccount().getAgeRange())
-        );
+        User newUser = AuthConverter.toUser(kakaoProfile);
+        newUser.setAge(getEstimatedAge(kakaoProfile.getKakaoAccount().getAgeRange()));
+
         return userRepository.save(newUser);
     }
 

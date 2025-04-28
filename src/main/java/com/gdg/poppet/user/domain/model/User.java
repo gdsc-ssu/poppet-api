@@ -43,4 +43,8 @@ public class User extends BaseEntity {
     public void updateEmailPeriod(int emailPeriod) {
         this.emailPeriod = EmailPeriod.fromValue(emailPeriod);
     }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
 }
