@@ -40,11 +40,17 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Email> emails;
 
+    private String refreshToken; // 리프레시 토큰
+
     public void updateEmailPeriod(int emailPeriod) {
         this.emailPeriod = EmailPeriod.fromValue(emailPeriod);
     }
 
     public void setAge(int age) {
         this.age = age;
+    }
+
+    public void updateRefreshToken(String updateRefreshToken) {
+        this.refreshToken = updateRefreshToken;
     }
 }

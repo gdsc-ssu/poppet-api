@@ -20,4 +20,9 @@ public class AuthController {
     public ResponseEntity<ApiResponse<UserDto>> kakaoLogin(@RequestParam("code") String accessCode, HttpServletResponse httpServletResponse) {
         return ApiResponse.success(SuccessStatus.LOGIN_SUCCESS, authService.kakaoOAuthLogin(accessCode, httpServletResponse));
     }
+
+    @GetMapping("/auth/login/google")
+    public ResponseEntity<ApiResponse<UserDto>> googleLogin(@RequestParam("code") String accessCode, HttpServletResponse httpServletResponse) {
+        return ApiResponse.success(SuccessStatus.LOGIN_SUCCESS, authService.kakaoOAuthLogin(accessCode, httpServletResponse));
+    }
 }
