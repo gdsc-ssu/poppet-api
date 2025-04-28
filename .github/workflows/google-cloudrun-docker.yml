@@ -104,7 +104,9 @@ jobs:
             KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }},
             GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }},
             AI_GEMINI_CHAT_PROMPT_LOCATION=${{ secrets.AI_GEMINI_CHAT_PROMPT_LOCATION }},
-            AI_GEMINI_SUMMARY_PROMPT_LOCATION=${{ secrets.AI_GEMINI_SUMMARY_PROMPT_LOCATION }}
+            AI_GEMINI_SUMMARY_PROMPT_LOCATION=${{ secrets.AI_GEMINI_SUMMARY_PROMPT_LOCATION }},
+            MAIL_USERNAME=${{ secrets.MAIL_USERNAME }},
+            MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}
 
       # 10) 배포 후 URL 출력
       - name: 'Show output'
