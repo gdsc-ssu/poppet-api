@@ -41,6 +41,16 @@ spring:
           starttls:
             enable: true
             required: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - email
+              - profile
 
 ai:
   gemini:
@@ -58,3 +68,12 @@ kakao:
 logging:
   level:
     org.springframework.web: DEBUG
+
+jwt:
+  secretKey: ${JWT_SECRET_KEY}
+  access:
+    expiration: 3600000 # 1시간(60분) (1000L(ms -> s) * 60L(s -> m) * 60L(m -> h))
+    header: Authorization
+  refresh:
+    expiration: 1209600000 #  (1000L(ms -> s) * 60L(s -> m) * 60L(m -> h) * 24L(h -> 하루) * 14(2주))
+    header: Authorization-refresh
