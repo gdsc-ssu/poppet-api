@@ -5,4 +5,5 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public interface AuthService {
     UserDto kakaoOAuthLogin(String accessCode, HttpServletResponse httpServletResponse);
+    UserDto googleOAuthLogin(String accessCode, HttpServletResponse httpServletResponse);
 }
