@@ -145,7 +145,7 @@ public class JwtService {
     /**
      * RefreshToken DB 저장(업데이트)
      */
-    public void updateRefreshToken(long userId, String refreshToken) {
+    public void updateRefreshToken(String userId, String refreshToken) {
         userRepository.findByUserId(userId)
                 .ifPresentOrElse(
                         user -> user.updateRefreshToken(refreshToken),
