@@ -1,5 +1,6 @@
 package com.gdg.poppet.auth.infra.util;
 
+import com.gdg.poppet.auth.application.dto.response.GoogleExtraProfile;
 import com.gdg.poppet.auth.application.dto.response.GoogleTokenResponse;
 import com.gdg.poppet.auth.application.dto.response.GoogleUserInfo;
 import lombok.RequiredArgsConstructor;
@@ -62,6 +63,22 @@ public class GoogleAuthClient {
         GoogleUserInfo profile = mono.block();
         log.info("Google profile: {}", profile);
         return profile;
+    }
+
+    /** 3) People API 로 Gender, Birthday 조회 */
+    public GoogleExtraProfile requestExtraProfile(String accessToken) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .scheme("https")
+                        .host("people.googleapis.com")
+                        .path("/v1/people/me")
+                        .queryParam("personFields", "genders,birthdays")
+                        .build()
+                )
+                .headers(h -> h.setBearerAuth(accessToken))
+                .retrieve()
+                .bodyToMono(GoogleExtraProfile.class)
+                .block();
     }
 }
 

@@ -2,6 +2,7 @@ package com.gdg.poppet.auth.application.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.gdg.poppet.user.domain.enums.Provider;
 import com.gdg.poppet.user.domain.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -9,7 +10,7 @@ import java.util.Date;
 import java.util.Optional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -35,12 +36,13 @@ public class JwtService {
     private String refreshHeader;
 
     /**
-     * JWT의 Subject와 Claim으로 email 사용 -> 클레임의 name을 "email"으로 설정 JWT의 헤더에 들어오는 값 : 'Authorization(Key) = Bearer {토큰}
+     * JWT의 Subject와 Claim으로 userName 사용 -> 클레임의 name을 "userId"으로 설정 JWT의 헤더에 들어오는 값 : 'Authorization(Key) = Bearer {토큰}
      * (Value)' 형식
      */
     private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
     private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
-    private static final String EMAIL_CLAIM = "email";
+    private static final String USER_ID_CLAIM   = "userId";
+    private static final String PROVIDER_CLAIM  = "provider";
     private static final String BEARER = "Bearer ";
 
     private final UserRepository userRepository;
@@ -48,15 +50,13 @@ public class JwtService {
     /**
      * AccessToken 생성 메소드
      */
-    public String createAccessToken(String email) {
+    public String createAccessToken(String userId, Provider provider) {
         Date now = new Date();
         return JWT.create() // JWT 토큰을 생성하는 빌더 반환
                 .withSubject(ACCESS_TOKEN_SUBJECT) // JWT의 Subject 지정 -> AccessToken이므로 AccessToken
                 .withExpiresAt(new Date(now.getTime() + accessTokenExpirationPeriod)) // 토큰 만료 시간 설정
-
-                //클레임으로는 email 사용
-                //추가하실 경우 .withClaim(클래임 이름, 클래임 값) 으로 설정해주시면 됩니다
-                .withClaim(EMAIL_CLAIM, email)
+                .withClaim(USER_ID_CLAIM, userId)
+                .withClaim(PROVIDER_CLAIM, provider.name())
                 .sign(Algorithm.HMAC512(secretKey)); // HMAC512 알고리즘 사용, application.yml에서 지정한 secret 키로 암호화
     }
 
@@ -111,24 +111,6 @@ public class JwtService {
     }
 
     /**
-     * AccessToken에서 Email 추출 추출 전에 JWT.require()로 검증기 생성 verify로 AceessToken 검증 후 유효하다면 getClaim()으로 이메일 추출 유효하지 않다면 빈
-     * Optional 객체 반환
-     */
-    public Optional<String> extractEmail(String accessToken) {
-        try {
-            // 토큰 유효성 검사하는 데에 사용할 알고리즘이 있는 JWT verifier builder 반환
-            return Optional.ofNullable(JWT.require(Algorithm.HMAC512(secretKey))
-                    .build() // 반환된 빌더로 JWT verifier 생성
-                    .verify(accessToken) // accessToken을 검증하고 유효하지 않다면 예외 발생
-                    .getClaim(EMAIL_CLAIM) // claim(Emial) 가져오기
-                    .asString());
-        } catch (Exception e) {
-            log.error("액세스 토큰이 유효하지 않습니다.");
-            return Optional.empty();
-        }
-    }
-
-    /**
      * AccessToken 헤더 설정
      */
     public void setAccessTokenHeader(HttpServletResponse response, String accessToken) {
@@ -145,11 +127,11 @@ public class JwtService {
     /**
      * RefreshToken DB 저장(업데이트)
      */
-    public void updateRefreshToken(String userId, String refreshToken) {
-        userRepository.findByUserId(userId)
+    public void updateRefreshToken(String userId, Provider provider, String refreshToken) {
+        userRepository.findByUserIdAndProvider(userId, provider)
                 .ifPresentOrElse(
                         user -> user.updateRefreshToken(refreshToken),
-                        () -> new Exception("일치하는 회원이 없습니다.")
+                        () -> { throw new RuntimeException("일치하는 회원이 없습니다."); }
                 );
     }
 
@@ -162,4 +144,33 @@ public class JwtService {
             return false;
         }
     }
+    public Optional<String> extractUserId(String token) {
+        try {
+            return Optional.ofNullable(
+                    JWT.require(Algorithm.HMAC512(secretKey))
+                            .build()
+                            .verify(token)
+                            .getClaim(USER_ID_CLAIM)
+                            .asString()
+            );
+        } catch (Exception e) {
+            log.error("유효하지 않은 토큰입니다. {}", e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    public Optional<Provider> extractProvider(String token) {
+        try {
+            String prov = JWT.require(Algorithm.HMAC512(secretKey))
+                    .build()
+                    .verify(token)
+                    .getClaim(PROVIDER_CLAIM)
+                    .asString();
+            return Optional.of(Provider.valueOf(prov));
+        } catch (Exception e) {
+            log.error("프로바이더 추출 실패: {}", e.getMessage());
+            return Optional.empty();
+        }
+    }
+
 }

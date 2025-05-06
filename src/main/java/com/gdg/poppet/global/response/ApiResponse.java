@@ -7,6 +7,7 @@ import com.gdg.poppet.global.base.BaseErrorStatus;
 import com.gdg.poppet.global.base.BaseSuccessStatus;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
 @Getter
@@ -30,6 +31,23 @@ public class ApiResponse<T> {
     public static <T> ResponseEntity<ApiResponse<T>> success(BaseSuccessStatus successStatus, T data) {
         return ResponseEntity.status(successStatus.getHttpStatus())
                 .body(new ApiResponse<>(true, successStatus.getCode(), successStatus.getMessage(), data));
+    }
+
+    // 성공 읍답 (토큰 포함)
+    public static <T> ResponseEntity<ApiResponse<T>> successWithToken(
+            BaseSuccessStatus status,
+            T data,
+            String token
+    ) {
+        return ResponseEntity
+                .status(status.getHttpStatus())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .body(new ApiResponse<>(
+                        true,
+                        status.getCode(),
+                        status.getMessage(),
+                        data
+                ));
     }
 
     // 에러 응답 (데이터 없음)

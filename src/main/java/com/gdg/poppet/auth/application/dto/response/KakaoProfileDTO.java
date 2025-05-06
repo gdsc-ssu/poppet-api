@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class KakaoProfileDTO {
-    private long id;
+    private String id;
 
     @JsonProperty("connected_at")
     private String connectedAt;
