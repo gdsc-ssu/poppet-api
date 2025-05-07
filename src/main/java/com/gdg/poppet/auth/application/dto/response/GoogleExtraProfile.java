@@ -11,9 +11,12 @@ public class GoogleExtraProfile {
     private List<BirthdayWrapper> birthdays;
 
     @Data public static class GenderWrapper {
-        private String value;    // e.g. "male", "female", "other"
+        private String value;
     }
     @Data public static class BirthdayWrapper {
+        private DateWrapper date;       // ← date 객체 매핑
+    }
+    @Data public static class DateWrapper {
         private Integer year;
         private Integer month;
         private Integer day;

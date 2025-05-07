@@ -95,11 +95,13 @@ public class AuthServiceImpl implements AuthService {
 
         // 2) birthday → age 계산
         int age = -1;
-        if (extra.getBirthdays() != null && !extra.getBirthdays().isEmpty()) {
-            GoogleExtraProfile.BirthdayWrapper bd = extra.getBirthdays().get(0);
-            if (bd.getYear() != null && bd.getMonth() != null && bd.getDay() != null) {
-                LocalDate birth = LocalDate.of(bd.getYear(), bd.getMonth(), bd.getDay());
-                age = Period.between(birth, LocalDate.now()).getYears();
+        if (!extra.getBirthdays().isEmpty()) {
+            GoogleExtraProfile.DateWrapper d = extra.getBirthdays().get(0).getDate();
+            if (d.getYear()!=null) {
+                age = Period.between(
+                        LocalDate.of(d.getYear(), d.getMonth(), d.getDay()),
+                        LocalDate.now()
+                ).getYears();
             }
         }
 

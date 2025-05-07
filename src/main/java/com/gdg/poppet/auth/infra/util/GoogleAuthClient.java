@@ -61,13 +61,13 @@ public class GoogleAuthClient {
                 .bodyToMono(GoogleUserInfo.class);
 
         GoogleUserInfo profile = mono.block();
-        log.info("Google profile: {}", profile);
+        log.debug("Google profile: {}", profile);
         return profile;
     }
 
     /** 3) People API 로 Gender, Birthday 조회 */
     public GoogleExtraProfile requestExtraProfile(String accessToken) {
-        return webClient.get()
+        Mono<GoogleExtraProfile> mono = webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .scheme("https")
                         .host("people.googleapis.com")
@@ -77,8 +77,11 @@ public class GoogleAuthClient {
                 )
                 .headers(h -> h.setBearerAuth(accessToken))
                 .retrieve()
-                .bodyToMono(GoogleExtraProfile.class)
-                .block();
+                .bodyToMono(GoogleExtraProfile.class);
+
+        GoogleExtraProfile extra = mono.block();
+        log.debug("Google extra: {}", extra);
+        return extra;
     }
 }
 
