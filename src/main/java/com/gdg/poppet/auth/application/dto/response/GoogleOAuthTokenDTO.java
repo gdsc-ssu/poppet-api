@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class GoogleTokenResponse {
+public class GoogleOAuthTokenDTO {
 
     @JsonProperty("access_token")
     private String accessToken;

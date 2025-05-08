@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class GoogleUserInfo {
+public class GoogleBasicProfileDTO {
 
     /** Google 고유 식별자 */
     private String sub;

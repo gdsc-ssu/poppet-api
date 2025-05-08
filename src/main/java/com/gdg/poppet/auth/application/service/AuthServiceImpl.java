@@ -1,8 +1,8 @@
 package com.gdg.poppet.auth.application.service;
 
-import com.gdg.poppet.auth.application.dto.response.GoogleExtraProfile;
-import com.gdg.poppet.auth.application.dto.response.GoogleTokenResponse;
-import com.gdg.poppet.auth.application.dto.response.GoogleUserInfo;
+import com.gdg.poppet.auth.application.dto.response.GoogleExtraProfileDTO;
+import com.gdg.poppet.auth.application.dto.response.GoogleOAuthTokenDTO;
+import com.gdg.poppet.auth.application.dto.response.GoogleBasicProfileDTO;
 import com.gdg.poppet.auth.application.dto.response.KakaoOAuthTokenDTO;
 import com.gdg.poppet.auth.application.dto.response.KakaoProfileDTO;
 import com.gdg.poppet.auth.application.dto.response.OAuthResult;
@@ -14,9 +14,10 @@ import com.gdg.poppet.user.domain.enums.Gender;
 import com.gdg.poppet.user.domain.enums.Provider;
 import com.gdg.poppet.user.domain.model.User;
 import com.gdg.poppet.user.domain.repository.UserRepository;
-import jakarta.servlet.http.HttpServletResponse;
+
 import java.time.LocalDate;
 import java.time.Period;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,10 +35,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public OAuthResult kakaoOAuthLogin(String accessCode) {
         // 인가코드로 토근 발급
-        KakaoOAuthTokenDTO oAuthToken = kakaoAuthClient.requestToken(accessCode);
+        KakaoOAuthTokenDTO oAuthToken = kakaoAuthClient.requestToken(accessCode).block();
         log.info("Kakao OAuth token: {}", oAuthToken);
         // 토큰으로 유저정보 가져오기
-        KakaoProfileDTO kakaoProfile = kakaoAuthClient.requestProfile(oAuthToken);
+        KakaoProfileDTO kakaoProfile = kakaoAuthClient.requestProfile(oAuthToken).block();
         log.info("Kakao profile: {}", kakaoProfile);
 
         Provider provider = Provider.KAKAO;
@@ -54,11 +55,11 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public OAuthResult googleOAuthLogin(String code) {
+    public OAuthResult googleOAuthLogin(String accessCode) {
         // 1) 코드→토큰, 2) 토큰→프로필
-        GoogleTokenResponse token   = googleAuthClient.requestToken(code);
-        GoogleUserInfo profile = googleAuthClient.requestProfile(token.getAccessToken());
-        GoogleExtraProfile extra = googleAuthClient.requestExtraProfile(token.getAccessToken());
+        GoogleOAuthTokenDTO token = googleAuthClient.requestToken(accessCode).block();
+        GoogleBasicProfileDTO profile = googleAuthClient.requestProfile(token.getAccessToken()).block();
+        GoogleExtraProfileDTO extra = googleAuthClient.requestExtraProfile(token.getAccessToken()).block();
         Provider provider = Provider.GOOGLE;
 
         // 3) 외부 ID + Provider 로 사용자 조회
@@ -73,20 +74,26 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private User createNewUser(KakaoProfileDTO kakaoProfile) {
-        User newUser = User.builder()
+        Gender gender = null;
+        if (kakaoProfile.getKakaoAccount().getGender() != null && !kakaoProfile.getKakaoAccount().getGender().isEmpty()) {
+            String genderValue = kakaoProfile.getKakaoAccount().getGender();
+            gender = Gender.fromString(genderValue);
+        }
+
+        int estimatedAge = getEstimatedAge(kakaoProfile.getKakaoAccount().getAgeRange());
+
+        return userRepository.save(
+                User.builder()
                 .userId(kakaoProfile.getId())
                 .provider(Provider.KAKAO)
                 .username(kakaoProfile.getKakaoAccount().getName())
-                .gender(Gender.fromString(kakaoProfile.getKakaoAccount().getGender()))
+                .gender(gender)
                 .emailPeriod(EmailPeriod.THREE)
-                .build();
-        newUser.setAge(getEstimatedAge(kakaoProfile.getKakaoAccount().getAgeRange()));
-
-        return userRepository.save(newUser);
+                .age(estimatedAge)
+                .build());
     }
 
-    private User createNewUser(GoogleUserInfo profile, GoogleExtraProfile extra) {
-        // 1) gender 매핑
+    private User createNewUser(GoogleBasicProfileDTO profile, GoogleExtraProfileDTO extra) {
         Gender gender = null;
         if (extra.getGenders() != null && !extra.getGenders().isEmpty()) {
             String genderValue = extra.getGenders().get(0).getValue();
@@ -96,8 +103,8 @@ public class AuthServiceImpl implements AuthService {
         // 2) birthday → age 계산
         int age = -1;
         if (!extra.getBirthdays().isEmpty()) {
-            GoogleExtraProfile.DateWrapper d = extra.getBirthdays().get(0).getDate();
-            if (d.getYear()!=null) {
+            GoogleExtraProfileDTO.DateWrapper d = extra.getBirthdays().get(0).getDate();
+            if (d.getYear() != null) {
                 age = Period.between(
                         LocalDate.of(d.getYear(), d.getMonth(), d.getDay()),
                         LocalDate.now()
@@ -107,14 +114,14 @@ public class AuthServiceImpl implements AuthService {
 
         // 3) User 엔티티 빌드 및 저장
         return userRepository.save(
-                User.builder()
-                        .userId(profile.getSub())
-                        .provider(Provider.GOOGLE)
-                        .username(profile.getName())
-                        .gender(gender)           // enum 타입 필드
-                        .age(age)                 // 계산된 나이
-                        .emailPeriod(EmailPeriod.THREE)
-                        .build()
+            User.builder()
+            .userId(profile.getSub())
+            .provider(Provider.GOOGLE)
+            .username(profile.getName())
+            .gender(gender)           // enum 타입 필드
+            .age(age)                 // 계산된 나이
+            .emailPeriod(EmailPeriod.THREE)
+            .build()
         );
     }
 

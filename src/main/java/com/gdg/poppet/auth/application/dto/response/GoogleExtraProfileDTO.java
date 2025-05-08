@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class GoogleExtraProfile {
+public class GoogleExtraProfileDTO {
     private List<GenderWrapper> genders;
     private List<BirthdayWrapper> birthdays;
 

@@ -50,7 +50,7 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
-            redirect-uri: "http://localhost:8080/auth/login/google"
+            redirect-uri: ${GOOGLE_REDIRECT}
             scope:
               - openid
               - profile
@@ -62,6 +62,12 @@ spring:
             token-uri: https://oauth2.googleapis.com/token
             user-info-uri: https://openidconnect.googleapis.com/v1/userinfo
 
+google:
+  oauth2:
+    people-api:
+      base-uri: https://people.googleapis.com/v1/people/me
+      person-fields: genders,birthdays
+
 ai:
   gemini:
     base-host: generativelanguage.googleapis.com
@@ -71,9 +77,11 @@ ai:
       summary: ${AI_GEMINI_SUMMARY_PROMPT_LOCATION}
 
 kakao:
-  auth:
+  oauth2:
+    token-uri: https://kauth.kakao.com/oauth/token
+    user-info-uri: https://kapi.kakao.com/v2/user/me
     client: ${KAKAO_CLIENT_ID}
-    redirect: http://localhost:8080/auth/login/kakao
+    redirect: ${KAKAO_REDIRECT}
 
 logging:
   level:
