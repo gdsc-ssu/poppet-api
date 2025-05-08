@@ -1,6 +1,8 @@
 spring:
   config:
-    import: optional:file:.env[.properties]
+    import:
+      - optional:file:.env
+      - optional:file:.env.properties
   profiles:
     active: dev
   datasource:
@@ -41,6 +43,30 @@ spring:
           starttls:
             enable: true
             required: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: ${GOOGLE_REDIRECT}
+            scope:
+              - openid
+              - profile
+              - email
+              - https://www.googleapis.com/auth/user.birthday.read
+              - https://www.googleapis.com/auth/user.gender.read
+        provider:
+          google:
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://openidconnect.googleapis.com/v1/userinfo
+
+google:
+  oauth2:
+    people-api:
+      base-uri: https://people.googleapis.com/v1/people/me
+      person-fields: genders,birthdays
 
 ai:
   gemini:
@@ -51,10 +77,21 @@ ai:
       summary: ${AI_GEMINI_SUMMARY_PROMPT_LOCATION}
 
 kakao:
-  auth:
+  oauth2:
+    token-uri: https://kauth.kakao.com/oauth/token
+    user-info-uri: https://kapi.kakao.com/v2/user/me
     client: ${KAKAO_CLIENT_ID}
-    redirect: http://localhost:8080/auth/login/kakao
+    redirect: ${KAKAO_REDIRECT}
 
 logging:
   level:
     org.springframework.web: DEBUG
+
+jwt:
+  secretKey: ${JWT_SECRET_KEY}
+  access:
+    expiration: 3600000 # 1시간(60분) (1000L(ms -> s) * 60L(s -> m) * 60L(m -> h))
+    header: Authorization
+  refresh:
+    expiration: 1209600000 #  (1000L(ms -> s) * 60L(s -> m) * 60L(m -> h) * 24L(h -> 하루) * 14(2주))
+    header: Authorization-refresh

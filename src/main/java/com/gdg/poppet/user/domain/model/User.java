@@ -5,6 +5,7 @@ import com.gdg.poppet.email.domain.model.Email;
 import com.gdg.poppet.global.domain.BaseEntity;
 import com.gdg.poppet.email.domain.enums.EmailPeriod;
 import com.gdg.poppet.user.domain.enums.Gender;
+import com.gdg.poppet.user.domain.enums.Provider;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,7 +23,12 @@ import java.util.List;
 public class User extends BaseEntity {
     @Id
     @Column(name = "user_id", nullable = false)
-    private Long userId;
+    private String userId;
+
+    /** KAKAO or GOOGLE */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private Provider provider;
 
     @Column(name = "username", nullable = false, length = 50)
     private String username;
@@ -40,11 +46,17 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Email> emails;
 
+    private String refreshToken; // 리프레시 토큰
+
     public void updateEmailPeriod(int emailPeriod) {
         this.emailPeriod = EmailPeriod.fromValue(emailPeriod);
     }
 
     public void setAge(int age) {
         this.age = age;
+    }
+
+    public void updateRefreshToken(String updateRefreshToken) {
+        this.refreshToken = updateRefreshToken;
     }
 }

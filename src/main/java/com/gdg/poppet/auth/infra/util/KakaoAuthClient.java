@@ -1,92 +1,78 @@
 package com.gdg.poppet.auth.infra.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gdg.poppet.auth.application.dto.response.KakaoOAuthTokenDTO;
 import com.gdg.poppet.auth.application.dto.response.KakaoProfileDTO;
+import com.gdg.poppet.global.exception.GlobalException;
+import com.gdg.poppet.global.status.ErrorStatus;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class KakaoAuthClient {
 
-    @Value("${kakao.auth.client}")
-    private String client;
-    @Value("${kakao.auth.redirect}")
-    private String redirect;
+    private final WebClient webClient;
 
-    public KakaoOAuthTokenDTO requestToken(String accessCode) {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+    @Value("${kakao.oauth2.client}")
+    private String clientId;
 
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("grant_type", "authorization_code");
-        params.add("client_id", client);
-        params.add("redirect_url", redirect);
-        params.add("code", accessCode);
+    @Value("${kakao.oauth2.redirect}")
+    private String redirectUri;
 
-        HttpEntity<MultiValueMap<String, String>> kakaoTokenRequest = new HttpEntity<>(params, headers);
+    @Value("${kakao.oauth2.token-uri}")
+    private String tokenUri;
 
-        ResponseEntity<String> response = restTemplate.exchange(
-                "https://kauth.kakao.com/oauth/token",
-                HttpMethod.POST,
-                kakaoTokenRequest,
-                String.class);
+    @Value("${kakao.oauth2.user-info-uri}")
+    private String userInfoUri;
 
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        KakaoOAuthTokenDTO oAuthToken = null;
-
-        try {
-            oAuthToken = objectMapper.readValue(response.getBody(), KakaoOAuthTokenDTO.class);
-            log.info("oAuthToken : " + oAuthToken.getAccess_token());
-        } catch (JsonProcessingException e) {
-            log.warn("[*] 카카오 oAuthToken 받아오는 중 오류 발생 : {}", e.getMessage());
-            throw new RuntimeException(e);
-        }
-        return oAuthToken;
-
+    /**
+     * 1) authorization code → Access Token 교환
+     */
+    public Mono<KakaoOAuthTokenDTO> requestToken(String accessCode) {
+        return webClient.post()
+                .uri(tokenUri)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData("grant_type", "authorization_code")
+                        .with("client_id", clientId)
+                        .with("redirect_uri", redirectUri)
+                        .with("code", accessCode))
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::isError,
+                        resp -> Mono.error(new GlobalException(ErrorStatus.OAUTH_ERROR))
+                )
+                .bodyToMono(KakaoOAuthTokenDTO.class)
+                .doOnNext(token -> log.info("Kakao OAuth token: {}", token.getAccess_token()));
     }
 
-    public KakaoProfileDTO requestProfile(KakaoOAuthTokenDTO oAuthToken) {
-        RestTemplate restTemplate2 = new RestTemplate();
-        HttpHeaders headers2 = new HttpHeaders();
-
-        headers2.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
-        headers2.add("Authorization", "Bearer " + oAuthToken.getAccess_token());
-
-        HttpEntity<MultiValueMap<String, String>> kakaoProfileRequest = new HttpEntity<>(headers2);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        ResponseEntity<String> response2 = restTemplate2.exchange(
-                "https://kapi.kakao.com/v2/user/me",
-                HttpMethod.GET,
-                kakaoProfileRequest,
-                String.class);
-
-        log.info(response2.getBody());
-
-        KakaoProfileDTO kakaoProfile = null;
-        try {
-            kakaoProfile = objectMapper.readValue(response2.getBody(), KakaoProfileDTO.class);
-        } catch (JsonProcessingException e) {
-            log.info(Arrays.toString(e.getStackTrace()));
-            throw new RuntimeException(e);
-        }
-
-        return kakaoProfile;
+    /**
+     * 2) Access Token → Kakao UserInfo 조회
+     */
+    public Mono<KakaoProfileDTO> requestProfile(KakaoOAuthTokenDTO tokenDto) {
+        return webClient.get()
+                .uri(userInfoUri)
+                .headers(h -> {
+                    h.setBearerAuth(tokenDto.getAccess_token());
+                    h.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+                })
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::isError,
+                        resp -> Mono.error(new GlobalException(ErrorStatus.PROFILE_ERROR))
+                )
+                .bodyToMono(KakaoProfileDTO.class)
+                .doOnNext(profile -> log.info("Kakao profile: {}", profile));
     }
 }

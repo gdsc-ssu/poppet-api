@@ -27,8 +27,11 @@ public enum ErrorStatus implements BaseErrorStatus {
     EMAIL_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "존재하지 않는 이메일입니다."),
 
     // chat
-    STT_FILE_IS_EMPTY(HttpStatus.BAD_REQUEST, 404, "음성 파일이 존재하지 않습니다.");
+    STT_FILE_IS_EMPTY(HttpStatus.BAD_REQUEST, 404, "음성 파일이 존재하지 않습니다."),
 
+    // oauth
+    OAUTH_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 500, "SNS로그인 오류입니다."),
+    PROFILE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 500, "유저정보 불러오기 오류입니다.");
 
     private final HttpStatus httpStatus;
     private final Integer code;
