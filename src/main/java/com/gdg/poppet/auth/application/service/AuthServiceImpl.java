@@ -36,11 +36,8 @@ public class AuthServiceImpl implements AuthService {
     public OAuthResult kakaoOAuthLogin(String accessCode) {
         // 인가코드로 토근 발급
         KakaoOAuthTokenDTO oAuthToken = kakaoAuthClient.requestToken(accessCode).block();
-        log.info("Kakao OAuth token: {}", oAuthToken);
         // 토큰으로 유저정보 가져오기
         KakaoProfileDTO kakaoProfile = kakaoAuthClient.requestProfile(oAuthToken).block();
-        log.info("Kakao profile: {}", kakaoProfile);
-
         Provider provider = Provider.KAKAO;
 
         // 유저정보 ID로 조회 후, 없을 경우 User 생성
@@ -78,6 +75,8 @@ public class AuthServiceImpl implements AuthService {
         if (kakaoProfile.getKakaoAccount().getGender() != null && !kakaoProfile.getKakaoAccount().getGender().isEmpty()) {
             String genderValue = kakaoProfile.getKakaoAccount().getGender();
             gender = Gender.fromString(genderValue);
+        } else {
+            gender = Gender.MALE;
         }
 
         int estimatedAge = getEstimatedAge(kakaoProfile.getKakaoAccount().getAgeRange());
@@ -98,6 +97,8 @@ public class AuthServiceImpl implements AuthService {
         if (extra.getGenders() != null && !extra.getGenders().isEmpty()) {
             String genderValue = extra.getGenders().get(0).getValue();
             gender = Gender.fromString(genderValue);
+        } else {
+            gender = Gender.MALE;
         }
 
         // 2) birthday → age 계산
