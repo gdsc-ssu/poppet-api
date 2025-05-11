@@ -108,6 +108,7 @@ jobs:
             AI_GEMINI_CHAT_PROMPT_LOCATION=${{ secrets.AI_GEMINI_CHAT_PROMPT_LOCATION }},
             AI_GEMINI_SUMMARY_PROMPT_LOCATION=${{ secrets.AI_GEMINI_SUMMARY_PROMPT_LOCATION }},
             MAIL_USERNAME=${{ secrets.MAIL_USERNAME }},
+            MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }},
             JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }},
             GOOGLE_REDIRECT=${{ secrets.GOOGLE_REDIRECT }},
             KAKAO_REDIRECT=${{ secrets.KAKAO_REDIRECT }}
