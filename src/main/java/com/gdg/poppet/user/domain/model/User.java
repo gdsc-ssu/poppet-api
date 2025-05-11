@@ -7,6 +7,7 @@ import com.gdg.poppet.email.domain.enums.EmailPeriod;
 import com.gdg.poppet.user.domain.enums.Gender;
 import com.gdg.poppet.user.domain.enums.Provider;
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -43,8 +44,12 @@ public class User extends BaseEntity {
     @Column(name = "email_period", nullable = false)
     private EmailPeriod emailPeriod;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Email> emails;
+    @OneToMany(mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY)
+    @Builder.Default       // <-- Lombok 빌더에도 기본값으로 빈 리스트를 넣어 줌
+    private List<Email> emails = new ArrayList<>();
 
     private String refreshToken; // 리프레시 토큰
 
