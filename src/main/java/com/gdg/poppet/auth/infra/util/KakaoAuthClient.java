@@ -49,10 +49,11 @@ public class KakaoAuthClient {
                         .with("redirect_uri", redirectUri)
                         .with("code", accessCode))
                 .retrieve()
-                .onStatus(
-                        HttpStatusCode::isError,
-                        resp -> Mono.error(new GlobalException(ErrorStatus.OAUTH_ERROR))
-                )
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> {
+                    log.error("클라이언트 오류 발생: 상태 코드 - {}", clientResponse.statusCode());
+                    return clientResponse.bodyToMono(String.class)
+                            .map(errorBody -> new GlobalException(ErrorStatus.OAUTH_ERROR));
+                })
                 .bodyToMono(KakaoOAuthTokenDTO.class)
                 .doOnNext(token -> log.info("Kakao OAuth token: {}", token.getAccess_token()));
     }
