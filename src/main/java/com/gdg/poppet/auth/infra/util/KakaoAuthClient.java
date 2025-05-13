@@ -38,6 +38,20 @@ public class KakaoAuthClient {
     private String userInfoUri;
 
     /**
+     * 0) 모바일용 Access Token 검증 및 프로필 조회
+     */
+    public Mono<KakaoProfileDTO> verifyAccessToken(String accessToken) {
+        return webClient.get()
+                .uri(userInfoUri)
+                .headers(h -> h.setBearerAuth(accessToken))
+                .retrieve()
+                .onStatus(HttpStatusCode::isError,
+                        resp -> Mono.error(new GlobalException(ErrorStatus.PROFILE_ERROR)))
+                .bodyToMono(KakaoProfileDTO.class)
+                .doOnNext(profile -> log.debug("Verified Kakao profile: {}", profile));
+    }
+
+    /**
      * 1) authorization code → Access Token 교환
      */
     public Mono<KakaoOAuthTokenDTO> requestToken(String accessCode) {

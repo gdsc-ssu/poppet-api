@@ -70,9 +70,45 @@ public class AuthServiceImpl implements AuthService {
         return new OAuthResult(jwt, dto);
     }
 
+    @Override
+    public OAuthResult kakaoOAuthLoginWithTokens(String accessToken) {
+        // 1) 액세스 토큰으로 프로필 조회 (verifyAccessToken은 앞서 추가한 메서드)
+        KakaoProfileDTO profile = kakaoAuthClient.verifyAccessToken(accessToken).block();
+
+        Provider provider = Provider.KAKAO;
+
+        // 2) 사용자 조회/생성 (기존 createNewUser(KakaoProfileDTO) 재사용)
+        User user = userRepository
+                .findByUserIdAndProvider(profile.getId(), provider)
+                .orElseGet(() -> createNewUser(profile));
+
+        // 3) JWT 발급
+        String jwt = jwtService.createAccessToken(user.getUserId(), user.getProvider());
+        return new OAuthResult(jwt, UserDto.of(user.getUsername()));
+    }
+
+    @Override
+    public OAuthResult googleOAuthLoginWithTokens(String idToken, String accessToken) {
+        // 1) idToken 검증 (서명·만료 검사)
+        GoogleBasicProfileDTO basic = googleAuthClient.verifyIdToken(idToken).block();
+        // 2) accessToken 으로 프로필·추가정보 조회
+        GoogleExtraProfileDTO extra = googleAuthClient.requestExtraProfile(accessToken).block();
+        Provider provider = Provider.GOOGLE;
+
+        // 3) 사용자 조회/생성
+        User user = userRepository
+                .findByUserIdAndProvider(basic.getSub(), provider)
+                .orElseGet(() -> createNewUser(basic, extra));
+
+        // 4) 자체 JWT 발급
+        String jwt = jwtService.createAccessToken(user.getUserId(), user.getProvider());
+        return new OAuthResult(jwt, UserDto.of(user.getUsername()));
+    }
+
     private User createNewUser(KakaoProfileDTO kakaoProfile) {
         Gender gender = null;
-        if (kakaoProfile.getKakaoAccount().getGender() != null && !kakaoProfile.getKakaoAccount().getGender().isEmpty()) {
+        if (kakaoProfile.getKakaoAccount().getGender() != null && !kakaoProfile.getKakaoAccount().getGender()
+                .isEmpty()) {
             String genderValue = kakaoProfile.getKakaoAccount().getGender();
             gender = Gender.fromString(genderValue);
         } else {
@@ -83,13 +119,13 @@ public class AuthServiceImpl implements AuthService {
 
         return userRepository.save(
                 User.builder()
-                .userId(kakaoProfile.getId())
-                .provider(Provider.KAKAO)
-                .username(kakaoProfile.getKakaoAccount().getName())
-                .gender(gender)
-                .emailPeriod(EmailPeriod.THREE)
-                .age(estimatedAge)
-                .build());
+                        .userId(kakaoProfile.getId())
+                        .provider(Provider.KAKAO)
+                        .username(kakaoProfile.getKakaoAccount().getName())
+                        .gender(gender)
+                        .emailPeriod(EmailPeriod.THREE)
+                        .age(estimatedAge)
+                        .build());
     }
 
     private User createNewUser(GoogleBasicProfileDTO profile, GoogleExtraProfileDTO extra) {
@@ -115,14 +151,14 @@ public class AuthServiceImpl implements AuthService {
 
         // 3) User 엔티티 빌드 및 저장
         return userRepository.save(
-            User.builder()
-            .userId(profile.getSub())
-            .provider(Provider.GOOGLE)
-            .username(profile.getName())
-            .gender(gender)           // enum 타입 필드
-            .age(age)                 // 계산된 나이
-            .emailPeriod(EmailPeriod.THREE)
-            .build()
+                User.builder()
+                        .userId(profile.getSub())
+                        .provider(Provider.GOOGLE)
+                        .username(profile.getName())
+                        .gender(gender)           // enum 타입 필드
+                        .age(age)                 // 계산된 나이
+                        .emailPeriod(EmailPeriod.THREE)
+                        .build()
         );
     }
 

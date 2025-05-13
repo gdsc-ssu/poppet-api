@@ -51,6 +51,24 @@ public class GoogleAuthClient {
     private String personFields;
 
     /**
+     * 0) ID Token 검증 및 기본 프로필 반환
+     */
+    public Mono<GoogleBasicProfileDTO> verifyIdToken(String idToken) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .scheme("https")
+                        .host("oauth2.googleapis.com")
+                        .path("/tokeninfo")
+                        .queryParam("id_token", idToken)
+                        .build())
+                .retrieve()
+                .onStatus(HttpStatusCode::isError,
+                        resp -> Mono.error(new GlobalException(ErrorStatus.OAUTH_ERROR)))
+                .bodyToMono(GoogleBasicProfileDTO.class)
+                .doOnNext(profile -> log.debug("Verified ID token for: {}", profile.getEmail()));
+    }
+
+    /**
      * 1) authorization code → Access Token 교환
      */
     public Mono<GoogleOAuthTokenDTO> requestToken(String code) {
