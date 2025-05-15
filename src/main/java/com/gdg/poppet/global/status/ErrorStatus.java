@@ -25,6 +25,7 @@ public enum ErrorStatus implements BaseErrorStatus {
     EMAIL_FORMAT_INVALID(HttpStatus.BAD_REQUEST, 400, "올바르지 않은 이메일 형식입니다."),
     USER_EMAIL_FORBIDDEN(HttpStatus.FORBIDDEN, 403, "유저가 이메일에 대해 접근 권한이 없습니다."),
     EMAIL_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "존재하지 않는 이메일입니다."),
+    EMAIL_COUNT_OVERFLOW(HttpStatus.BAD_REQUEST, 400, "이메일 리스트는 5개 이하만 등록 가능합니다."),
 
     // chat
     STT_FILE_IS_EMPTY(HttpStatus.BAD_REQUEST, 404, "음성 파일이 존재하지 않습니다."),

@@ -57,10 +57,6 @@ public class User extends BaseEntity {
         this.emailPeriod = EmailPeriod.fromValue(emailPeriod);
     }
 
-    public void setAge(int age) {
-        this.age = age;
-    }
-
     public void updateRefreshToken(String updateRefreshToken) {
         this.refreshToken = updateRefreshToken;
     }
