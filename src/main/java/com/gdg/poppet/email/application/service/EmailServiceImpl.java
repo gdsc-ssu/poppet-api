@@ -10,6 +10,7 @@ import com.gdg.poppet.email.application.dto.response.EmailDto;
 import com.gdg.poppet.email.application.dto.response.EmailPeriodDto;
 import com.gdg.poppet.email.domain.converter.EmailConverter;
 import com.gdg.poppet.email.domain.model.Email;
+import com.gdg.poppet.user.domain.enums.Provider;
 import com.gdg.poppet.user.domain.model.User;
 import com.gdg.poppet.email.domain.repository.EmailRepository;
 import com.gdg.poppet.user.domain.repository.UserRepository;
@@ -69,7 +70,6 @@ public class EmailServiceImpl implements EmailService {
     public List<EmailDto> getEmailAddressList(String username) {
         User user = getUser(username);
         List<Email> emailList = emailRepository.findByUser(user);
-
         return emailList.stream()
                 .map(EmailConverter::toEmailDto)
                 .collect(Collectors.toList());
@@ -134,6 +134,7 @@ public class EmailServiceImpl implements EmailService {
     public void deleteEmailAddress(String username, Long emailId) {
         User user = getUser(username);
         Email email = getEmail(emailId);
+
         validateIsUserAuthorizedForEmail(user, email);
 
         emailRepository.delete(email);
@@ -188,8 +189,9 @@ public class EmailServiceImpl implements EmailService {
                 .anyMatch(Email -> Email.getEmailAddress().equals(email));
     }
 
-    private User getUser(String username) {
-        return userRepository.findByUsername(username)
+    private User getUser(String key) {
+        String[] auth = key.split("#");
+        return userRepository.findByUserIdAndProvider(auth[0], Provider.valueOf(auth[1]))
                 .orElseThrow(() -> new GlobalException(ErrorStatus.USER_NOT_FOUND));
     }
 

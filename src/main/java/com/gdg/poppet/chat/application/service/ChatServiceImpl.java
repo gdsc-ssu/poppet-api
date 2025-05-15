@@ -9,6 +9,7 @@ import com.gdg.poppet.chat.infra.gemini.application.service.GeminiService;
 import com.gdg.poppet.chat.infra.speech.application.GoogleCloudService;
 import com.gdg.poppet.global.exception.GlobalException;
 import com.gdg.poppet.global.status.ErrorStatus;
+import com.gdg.poppet.user.domain.enums.Provider;
 import com.gdg.poppet.user.domain.model.User;
 import com.gdg.poppet.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -128,8 +129,9 @@ public class ChatServiceImpl implements ChatService {
         return chatRoomRepository.save(newChatRoom);
     }
 
-    private User getUser(String username) {
-        return userRepository.findByUsername(username)
+    private User getUser(String key) {
+        String[] auth = key.split("#");
+        return userRepository.findByUserIdAndProvider(auth[0], Provider.valueOf(auth[1]))
                 .orElseThrow(() -> new GlobalException(ErrorStatus.USER_NOT_FOUND));
     }
 }
