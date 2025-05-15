@@ -15,7 +15,9 @@ public class EmailSendScheduler {
     private final EmailService emailService;
 
     // 매일 12시에 스케쥴러 수행
-    @Scheduled(cron = "0 0 12 * * *")
+//    @Scheduled(cron = "0 0 12 * * *")
+    // 1시간마다 스케쥴러 수행
+    @Scheduled(cron = "0 0 */1 * * *")
     public void sendUnsentEmails() {
         emailService.sendEmail();
         log.info("[*] {} Email 전송 완료", LocalDateTime.now());

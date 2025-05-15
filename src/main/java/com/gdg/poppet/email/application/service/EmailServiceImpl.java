@@ -87,6 +87,7 @@ public class EmailServiceImpl implements EmailService {
     public List<EmailDto> postEmailAddress(String username, EmailRequestDto emailRequestDto) {
         User user = getUser(username);
 
+        validateEmailCount(user);
         validateDuplicateEmail(emailRequestDto.getNewEmail(), user);
         validateEmailFormat(emailRequestDto.getNewEmail());
 
@@ -168,6 +169,12 @@ public class EmailServiceImpl implements EmailService {
     private void validateIsUserAuthorizedForEmail(User user, Email email) {
         if (!email.getUser().equals(user)) {
             throw new GlobalException(ErrorStatus.USER_EMAIL_FORBIDDEN);
+        }
+    }
+
+    private void validateEmailCount(User user) {
+        if (user.getEmails().size() >= 5) {
+            throw new GlobalException(ErrorStatus.EMAIL_COUNT_OVERFLOW);
         }
     }
 
