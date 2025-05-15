@@ -92,13 +92,13 @@ public class AuthServiceImpl implements AuthService {
         // 1) idToken 검증 (서명·만료 검사)
         GoogleBasicProfileDTO basic = googleAuthClient.verifyIdToken(idToken).block();
         // 2) accessToken 으로 프로필·추가정보 조회
-        GoogleExtraProfileDTO extra = googleAuthClient.requestExtraProfile(accessToken).block();
+        // GoogleExtraProfileDTO extra = googleAuthClient.requestExtraProfile(accessToken).block();
         Provider provider = Provider.GOOGLE;
 
         // 3) 사용자 조회/생성
         User user = userRepository
                 .findByUserIdAndProvider(basic.getSub(), provider)
-                .orElseGet(() -> createNewUser(basic, extra));
+                .orElseGet(() -> createNewUser(basic, null)); //임시 : 성별, 연령정보 70,  FEMALE로 입력
 
         // 4) 자체 JWT 발급
         String jwt = jwtService.createAccessToken(user.getUserId(), user.getProvider());
@@ -134,11 +134,11 @@ public class AuthServiceImpl implements AuthService {
             String genderValue = extra.getGenders().get(0).getValue();
             gender = Gender.fromString(genderValue);
         } else {
-            gender = Gender.MALE;
+            gender = Gender.FEMALE;
         }
 
         // 2) birthday → age 계산
-        int age = -1;
+        int age = 70;
         if (!extra.getBirthdays().isEmpty()) {
             GoogleExtraProfileDTO.DateWrapper d = extra.getBirthdays().get(0).getDate();
             if (d.getYear() != null) {
