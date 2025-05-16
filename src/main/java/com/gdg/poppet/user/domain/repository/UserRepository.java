@@ -5,7 +5,6 @@ import com.gdg.poppet.user.domain.model.User;
 
 import java.util.List;
 import java.util.Optional;
-import org.aspectj.apache.bcel.classfile.Module.Provide;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,12 +22,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "WHERE u.userId = :userId " +
             "  AND u.provider = :provider")
     Optional<User> findByUserIdAndProvider(@Param("userId") String userId, @Param("provider") Provider provider);
-
-    @Query("SELECT u " +
-            "FROM User u " +
-            "JOIN FETCH u.emails el " +
-            "WHERE u.username = :username" )
-    Optional<User> findByUsername(String username);
 
     @Query("SELECT u " +
             "FROM User u " +

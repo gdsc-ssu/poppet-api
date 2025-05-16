@@ -15,9 +15,9 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     @Query(value = "SELECT cr " +
             "FROM ChatRoom cr " +
-            "WHERE cr.username = :username " +
+            "WHERE cr.userId = :userId " +
             "ORDER BY cr.createdAt DESC")
-    List<ChatRoom> findByUsernameAndCreatedAt(@Param(value = "username") String username);
+    List<ChatRoom> findByUserIdAndCreatedAt(@Param(value = "userId") String userId);
 
     @Modifying
     @Query("DELETE " +
@@ -27,8 +27,8 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     @Query(value = "SELECT cr " +
             "FROM ChatRoom cr " +
-            "WHERE cr.username = :username " +
+            "WHERE cr.userId = :userId " +
             "AND cr.isMailSent = FALSE " +
             "ORDER BY cr.createdAt DESC")
-    List<ChatRoom> findByUsernameAndCreatedAtAndNotMailSent(@Param(value = "username") String username);
+    List<ChatRoom> findByUserIdAndCreatedAtAndNotMailSent(@Param(value = "userId") String userId);
 }

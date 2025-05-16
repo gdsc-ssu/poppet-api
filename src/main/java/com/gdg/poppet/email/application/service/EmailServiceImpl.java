@@ -150,7 +150,7 @@ public class EmailServiceImpl implements EmailService {
         for (User user : userRepository.findAll()) {
 
             // 가장 최근 생성되고 메일을 보내지 않은 채팅방 조회
-            List<ChatRoom> chatRooms = chatRoomRepository.findByUsernameAndCreatedAtAndNotMailSent(user.getUsername());
+            List<ChatRoom> chatRooms = chatRoomRepository.findByUserIdAndCreatedAtAndNotMailSent(user.getUserId());
             if (chatRooms.isEmpty()) return;
 
             // 메일 보낼 채팅방 요약 내용 추출

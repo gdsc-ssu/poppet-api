@@ -26,7 +26,7 @@ public class ChatRoom extends BaseEntity {
     @Column(name = "summary", nullable = true, length = 1000)
     private String summary;
 
-    private String username;   // TODO: user 간접 참조
+    private String userId;   // user 간접 참조
 
     @Column(name = "is_mail_sent", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private boolean isMailSent;
