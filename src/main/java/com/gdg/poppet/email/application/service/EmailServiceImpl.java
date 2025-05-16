@@ -147,16 +147,17 @@ public class EmailServiceImpl implements EmailService {
     @Transactional
     @Override
     public void sendEmail() {
+        // 이메일 주소를 등록한 전체 유저 리스트 조회
         for (User user : userRepository.findAll()) {
 
             // 가장 최근 생성되고 메일을 보내지 않은 채팅방 조회
-            List<ChatRoom> chatRooms = chatRoomRepository.findByUsernameAndCreatedAtAndNotMailSent(user.getUsername());
-            if (chatRooms.isEmpty()) return;
+            List<ChatRoom> chatRooms = chatRoomRepository.findByUserIdAndCreatedAtAndNotMailSent(user.getUserId());
+            if (chatRooms.isEmpty()) continue;
 
             // 메일 보낼 채팅방 요약 내용 추출
             ChatRoom chatRoom = chatRooms.get(0);
             String chatSummary = chatRoom.getSummary();
-            if (chatSummary == null) return;
+            if (chatSummary == null) continue;
 
             // 메일 보냄 여부 수정
             chatRoom.updateIsMailSent();

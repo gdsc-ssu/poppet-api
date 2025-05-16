@@ -81,9 +81,9 @@ public class ChatServiceImpl implements ChatService {
         LocalDate emailPeriodDate = LocalDate.now().minusDays(user.getEmailPeriod().getValue());
 
         // 가장 최근 생성된 채팅방 조회
-        List<ChatRoom> chatRooms = chatRoomRepository.findByUsernameAndCreatedAt(user.getUsername());
+        List<ChatRoom> chatRooms = chatRoomRepository.findByUserIdAndCreatedAt(user.getUserId());
         ChatRoom chatRoom = chatRooms.isEmpty()
-                ? createFirstChatRoom(user.getUsername())
+                ? createFirstChatRoom(user.getUserId())
                 : chatRooms.get(0);
 
         // 설정된 이메일 전송 기간 내에 생성되었다면 채팅방 유지
@@ -92,17 +92,17 @@ public class ChatServiceImpl implements ChatService {
         }
 
         // 기간을 초과했다면 새로운 채팅방 생성
-        return createNewChatRoom(user.getUsername(), chatRoom);
+        return createNewChatRoom(user.getUserId(), chatRoom);
     }
 
-    private ChatRoom createNewChatRoom(String username, ChatRoom chatRoom) {
+    private ChatRoom createNewChatRoom(String userId, ChatRoom chatRoom) {
         // 가장 최근 chatroom summary 생성
         String summaryRequest = parseChatSummaryRequest(chatRoom);
         String summary = geminiService.generateChatSummary(summaryRequest);
         log.info("[*] ChatRoomSummary : {}", summary);
 
         // 새로운 chatRoom 생성
-        ChatRoom newChatRoom = ChatConverter.toChatRoom(username, summary);
+        ChatRoom newChatRoom = ChatConverter.toChatRoom(userId, summary);
         chatRoomRepository.save(newChatRoom);
 
         // 이전 chatRoom 제거
@@ -124,8 +124,8 @@ public class ChatServiceImpl implements ChatService {
         return chatSummary.toString();
     }
 
-    private ChatRoom createFirstChatRoom(String username) {
-        ChatRoom newChatRoom = ChatConverter.toChatRoom(username, null);
+    private ChatRoom createFirstChatRoom(String userId) {
+        ChatRoom newChatRoom = ChatConverter.toChatRoom(userId, null);
         return chatRoomRepository.save(newChatRoom);
     }
 
