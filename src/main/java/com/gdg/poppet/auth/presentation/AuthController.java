@@ -41,28 +41,4 @@ public class AuthController {
         );
     }
 
-    @GetMapping("/auth/login/google")
-    public ResponseEntity<ApiResponse<UserDto>> googleLogin(@RequestParam("code") String accessCode) {
-        OAuthResult result = authService.googleOAuthLogin(accessCode);
-        return ApiResponse.successWithToken(
-                SuccessStatus.LOGIN_SUCCESS,
-                result.userDto(),
-                result.accessToken()
-        );
-    }
-
-    @PostMapping("/auth/login/google")
-    public ResponseEntity<ApiResponse<UserDto>> googleLoginWithTokens(
-            @RequestBody LoginRequest req
-    ) {
-        OAuthResult result = authService.googleOAuthLoginWithTokens(
-                req.getIdToken(), req.getAccessToken()
-        );
-        return ApiResponse.successWithToken(
-                SuccessStatus.LOGIN_SUCCESS,
-                result.userDto(),
-                result.accessToken()
-        );
-    }
-
 }
