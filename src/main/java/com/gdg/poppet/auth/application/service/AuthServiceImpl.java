@@ -5,6 +5,8 @@ import com.gdg.poppet.auth.application.dto.response.KakaoProfileDTO;
 import com.gdg.poppet.auth.application.dto.response.OAuthResult;
 import com.gdg.poppet.auth.infra.util.KakaoAuthClient;
 import com.gdg.poppet.email.domain.enums.EmailPeriod;
+import com.gdg.poppet.global.exception.GlobalException;
+import com.gdg.poppet.global.status.ErrorStatus;
 import com.gdg.poppet.user.application.dto.response.UserDto;
 import com.gdg.poppet.user.domain.enums.Gender;
 import com.gdg.poppet.user.domain.enums.Provider;
@@ -23,80 +25,130 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
-
+    // For Web
     @Override
     public OAuthResult kakaoOAuthLogin(String accessCode) {
-        // 인가코드로 토근 발급
-        KakaoOAuthTokenDTO oAuthToken = kakaoAuthClient.requestToken(accessCode).block();
-        // 토큰으로 유저정보 가져오기
-        KakaoProfileDTO kakaoProfile = kakaoAuthClient.requestProfile(oAuthToken).block();
-        Provider provider = Provider.KAKAO;
+        try {
+            // 인가코드로 토큰 발급
+            KakaoOAuthTokenDTO oAuthToken = kakaoAuthClient.requestToken(accessCode).block();
+            if (oAuthToken == null) {
+                throw new GlobalException(ErrorStatus.OAUTH_TOKEN_ERROR);
+            }
 
-        // 유저정보 ID로 조회 후, 없을 경우 User 생성
-        User user = userRepository.findByUserIdAndProvider(kakaoProfile.getId(), provider)
-                .orElseGet(() -> createNewUser(kakaoProfile));
+            // 토큰으로 유저정보 가져오기
+            KakaoProfileDTO kakaoProfile = kakaoAuthClient.requestProfile(oAuthToken).block();
+            if (kakaoProfile == null) {
+                throw new GlobalException(ErrorStatus.PROFILE_ERROR);
+            }
 
-        // 4) JWT 생성 + 헤더 추가
-        String jwt = jwtService.createAccessToken(user.getUserId(), user.getProvider());
-        UserDto dto = UserDto.of(user.getUsername());
+            Provider provider = Provider.KAKAO;
 
-        return new OAuthResult(jwt, dto);
+            User user = userRepository.findByUserIdAndProvider(kakaoProfile.getId(), provider)
+                    .orElseGet(() -> createNewUser(kakaoProfile));
+
+            // JWT 생성
+            String jwt = jwtService.createAccessToken(user.getUserId(), user.getProvider());
+            UserDto dto = UserDto.of(user.getUsername());
+
+            return new OAuthResult(jwt, dto);
+        } catch (Exception e) {
+            log.error("카카오 OAuth 로그인 실패: {}", e.getMessage(), e);
+            throw new GlobalException(ErrorStatus.OAUTH_ERROR);
+        }
     }
 
+    //For Mobile
     @Override
     public OAuthResult kakaoOAuthLoginWithTokens(String accessToken) {
-        // 1) 액세스 토큰으로 프로필 조회 (verifyAccessToken은 앞서 추가한 메서드)
-        KakaoProfileDTO profile = kakaoAuthClient.verifyAccessToken(accessToken).block();
+        try {
+            // 액세스 토큰으로 프로필 조회
+            KakaoProfileDTO profile = kakaoAuthClient.verifyAccessToken(accessToken).block();
+            if (profile == null) {
+                throw new GlobalException(ErrorStatus.PROFILE_ERROR);
+            }
 
-        Provider provider = Provider.KAKAO;
+            Provider provider = Provider.KAKAO;
 
-        // 2) 사용자 조회/생성 (기존 createNewUser(KakaoProfileDTO) 재사용)
-        User user = userRepository
-                .findByUserIdAndProvider(profile.getId(), provider)
-                .orElseGet(() -> createNewUser(profile));
+            // 사용자 조회/생성
+            User user = userRepository
+                    .findByUserIdAndProvider(profile.getId(), provider)
+                    .orElseGet(() -> createNewUser(profile));
 
-        // 3) JWT 발급
-        String jwt = jwtService.createAccessToken(user.getUserId(), user.getProvider());
-        return new OAuthResult(jwt, UserDto.of(user.getUsername()));
+            // JWT 발급
+            String jwt = jwtService.createAccessToken(user.getUserId(), user.getProvider());
+            return new OAuthResult(jwt, UserDto.of(user.getUsername()));
+        } catch (Exception e) {
+            log.error("카카오 토큰 로그인 실패: {}", e.getMessage(), e);
+            throw new GlobalException(ErrorStatus.OAUTH_ERROR);
+        }
     }
 
     private User createNewUser(KakaoProfileDTO kakaoProfile) {
-        Gender gender = null;
-        if (kakaoProfile.getKakaoAccount().getGender() != null && !kakaoProfile.getKakaoAccount().getGender()
-                .isEmpty()) {
-            String genderValue = kakaoProfile.getKakaoAccount().getGender();
-            gender = Gender.fromString(genderValue);
-        } else {
-            gender = Gender.MALE;
+        try {
+            // 안전한 카카오 계정 정보 접근
+            var kakaoAccount = kakaoProfile.getKakaoAccount();
+            if (kakaoAccount == null) {
+                throw new GlobalException(ErrorStatus.PROFILE_ERROR);
+            }
+
+            Gender gender = Gender.MALE; // 기본값
+            if (kakaoAccount.getGender() != null && !kakaoAccount.getGender().isEmpty()) {
+                try {
+                    gender = Gender.fromString(kakaoAccount.getGender());
+                } catch (Exception e) {
+                    log.warn("성별 파싱 실패, 기본값 사용: {}", kakaoAccount.getGender());
+                }
+            }
+
+            int estimatedAge = getEstimatedAge(kakaoAccount.getAgeRange());
+
+            String username = kakaoAccount.getName();
+            if (username == null || username.trim().isEmpty()) {
+                username = "사용자" + kakaoProfile.getId(); // 기본 이름
+            }
+
+            return userRepository.save(
+                    User.builder()
+                            .userId(kakaoProfile.getId())
+                            .provider(Provider.KAKAO)
+                            .username(username)
+                            .gender(gender)
+                            .emailPeriod(EmailPeriod.THREE)
+                            .age(estimatedAge)
+                            .build());
+        } catch (Exception e) {
+            log.error("사용자 생성 실패: {}", e.getMessage(), e);
+            throw new GlobalException(ErrorStatus.USER_CREATE_ERROR);
         }
-
-        int estimatedAge = getEstimatedAge(kakaoProfile.getKakaoAccount().getAgeRange());
-
-        return userRepository.save(
-                User.builder()
-                        .userId(kakaoProfile.getId())
-                        .provider(Provider.KAKAO)
-                        .username(kakaoProfile.getKakaoAccount().getName())
-                        .gender(gender)
-                        .emailPeriod(EmailPeriod.THREE)
-                        .age(estimatedAge)
-                        .build());
     }
 
-    // 카카오는 나이를 20대, 30대 형태로 제공해 줌.
-    // 나이 범위 -> 평균 나이
+    // 카카오 나이 범위 파싱 수정
     private int getEstimatedAge(String ageRange) {
-        if (ageRange != null && ageRange.contains("~")) {
-            try {
+        if (ageRange == null || ageRange.trim().isEmpty()) {
+            return 25; // 기본 나이
+        }
+
+        try {
+            // 카카오는 "20~29" 또는 "20대" 형태로 제공
+            if (ageRange.contains("~")) {
+                // "20~29" 형태
                 String[] range = ageRange.split("~");
                 int minAge = Integer.parseInt(range[0].trim());
                 int maxAge = Integer.parseInt(range[1].trim());
                 return (minAge + maxAge) / 2;
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException(e);
+            } else if (ageRange.contains("대")) {
+                // "20대" 형태
+                String ageStr = ageRange.replace("대", "").trim();
+                int baseAge = Integer.parseInt(ageStr);
+                return baseAge + 5; // 20대 -> 25세
+            } else {
+                // 직접 숫자인 경우
+                return Integer.parseInt(ageRange.trim());
             }
+        } catch (NumberFormatException e) {
+            log.warn("나이 파싱 실패, 기본값 사용: {}", ageRange);
+            return 25; // 기본 나이
         }
-        return -1;
     }
 
 }
