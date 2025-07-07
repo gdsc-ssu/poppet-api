@@ -65,6 +65,11 @@ jobs:
         env:
           GCP_CREDENTIALS_JSON: ${{ secrets.GCP_CREDENTIALS_JSON }}
 
+      # 5-3) Apple OAuth P8 파일 생성 (Secrets → 실제파일)
+      - name: Create Apple OAuth P8 file
+        run: echo "$APPLE_P8_KEY" > AuthKey_HXCK973689.p8
+        env:
+          APPLE_P8_KEY: ${{ secrets.APPLE_P8_KEY }}
 
       # 6) Dockerfile 복호화 (Secrets에서 가져옴)
       - name: Decode Dockerfile from secret and save it
@@ -108,7 +113,11 @@ jobs:
             MAIL_USERNAME=${{ secrets.MAIL_USERNAME }},
             MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }},
             JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }},
-            KAKAO_REDIRECT=${{ secrets.KAKAO_REDIRECT }}
+            KAKAO_REDIRECT=${{ secrets.KAKAO_REDIRECT }},
+            APPLE_TEAM_ID=${{ secrets.APPLE_TEAM_ID }},
+            APPLE_CLIENT_ID=${{ secrets.APPLE_CLIENT_ID }},
+            APPLE_KEY_ID=${{ secrets.APPLE_KEY_ID }},
+            APPLE_REDIRECT_URI=${{ secrets.APPLE_REDIRECT_URI }}
 
       # 10) 배포 후 URL 출력
       - name: 'Show output'

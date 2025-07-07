@@ -56,4 +56,23 @@ public class AuthController {
     ) {
         return kakaoMobileLogin(req);
     }
+
+    // Apple 앱용 토큰 로그인
+    @PostMapping("/auth/login/apple/mobile")
+    public ResponseEntity<ApiResponse<UserDto>> appleMobileLogin(
+            @RequestBody LoginRequest req
+    ) {
+        log.info("Apple mobile app login attempt with identity token");
+        try {
+            OAuthResult result = authService.appleOAuthLoginWithTokens(req.getAccessToken());
+            return ApiResponse.successWithToken(
+                    SuccessStatus.LOGIN_SUCCESS,
+                    result.userDto(),
+                    result.accessToken()
+            );
+        } catch (Exception e) {
+            log.error("Apple mobile login failed", e);
+            throw e;
+        }
+    }
 }

@@ -1,8 +1,9 @@
 package com.gdg.poppet.auth.application.service;
 
-import com.gdg.poppet.auth.application.dto.response.KakaoOAuthTokenDTO;
+import com.gdg.poppet.auth.application.dto.response.AppleProfileDTO;
 import com.gdg.poppet.auth.application.dto.response.KakaoProfileDTO;
 import com.gdg.poppet.auth.application.dto.response.OAuthResult;
+import com.gdg.poppet.auth.infra.util.AppleAuthClient;
 import com.gdg.poppet.auth.infra.util.KakaoAuthClient;
 import com.gdg.poppet.email.domain.enums.EmailPeriod;
 import com.gdg.poppet.global.exception.GlobalException;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class AuthServiceImpl implements AuthService {
     private final KakaoAuthClient kakaoAuthClient;
+    private final AppleAuthClient appleAuthClient;
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
@@ -29,14 +31,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public OAuthResult kakaoOAuthLogin(String accessCode) {
         try {
-            // 인가코드로 토큰 발급
-            KakaoOAuthTokenDTO oAuthToken = kakaoAuthClient.requestToken(accessCode).block();
-            if (oAuthToken == null) {
-                throw new GlobalException(ErrorStatus.OAUTH_TOKEN_ERROR);
-            }
-
-            // 토큰으로 유저정보 가져오기
-            KakaoProfileDTO kakaoProfile = kakaoAuthClient.requestProfile(oAuthToken).block();
+            // 인가코드로 토큰 발급 후 바로 프로필 조회
+            KakaoProfileDTO kakaoProfile = kakaoAuthClient.requestTokenAndProfile(accessCode).block();
             if (kakaoProfile == null) {
                 throw new GlobalException(ErrorStatus.PROFILE_ERROR);
             }
@@ -83,6 +79,32 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
+    // For Apple Mobile
+    @Override
+    public OAuthResult appleOAuthLoginWithTokens(String identityToken) {
+        try {
+            // Identity Token 검증 및 프로필 조회
+            AppleProfileDTO profile = appleAuthClient.verifyIdentityToken(identityToken).block();
+            if (profile == null) {
+                throw new GlobalException(ErrorStatus.PROFILE_ERROR);
+            }
+
+            Provider provider = Provider.APPLE;
+
+            // 사용자 조회/생성
+            User user = userRepository
+                    .findByUserIdAndProvider(profile.getId(), provider)
+                    .orElseGet(() -> createNewAppleUser(profile));
+
+            // JWT 발급
+            String jwt = jwtService.createAccessToken(user.getUserId(), user.getProvider());
+            return new OAuthResult(jwt, UserDto.of(user.getUsername()));
+        } catch (Exception e) {
+            log.error("Apple 토큰 로그인 실패: {}", e.getMessage(), e);
+            throw new GlobalException(ErrorStatus.OAUTH_ERROR);
+        }
+    }
+
     private User createNewUser(KakaoProfileDTO kakaoProfile) {
         try {
             // 안전한 카카오 계정 정보 접근
@@ -118,6 +140,36 @@ public class AuthServiceImpl implements AuthService {
                             .build());
         } catch (Exception e) {
             log.error("사용자 생성 실패: {}", e.getMessage(), e);
+            throw new GlobalException(ErrorStatus.USER_CREATE_ERROR);
+        }
+    }
+
+    private User createNewAppleUser(AppleProfileDTO appleProfile) {
+        try {
+            // Apple은 성별과 나이 정보를 제공하지 않으므로 기본값 사용
+            Gender gender = Gender.MALE; // 기본값
+            int defaultAge = 25; // 기본 나이
+
+            // Apple은 이메일이 있을 때만 사용자명으로 사용, 없으면 기본 이름
+            String username = appleProfile.getValidEmail();
+            if (username == null || username.trim().isEmpty()) {
+                username = "Apple사용자" + appleProfile.getId().substring(0, 8); // 기본 이름
+            } else {
+                // 이메일에서 @ 앞 부분을 사용자명으로 사용
+                username = username.split("@")[0];
+            }
+
+            return userRepository.save(
+                    User.builder()
+                            .userId(appleProfile.getId())
+                            .provider(Provider.APPLE)
+                            .username(username)
+                            .gender(gender)
+                            .emailPeriod(EmailPeriod.THREE)
+                            .age(defaultAge)
+                            .build());
+        } catch (Exception e) {
+            log.error("Apple 사용자 생성 실패: {}", e.getMessage(), e);
             throw new GlobalException(ErrorStatus.USER_CREATE_ERROR);
         }
     }
