@@ -1,22 +1,19 @@
 package com.gdg.poppet.auth.infra.util;
 
-import com.gdg.poppet.auth.application.dto.response.KakaoOAuthTokenDTO;
 import com.gdg.poppet.auth.application.dto.response.KakaoProfileDTO;
+import com.gdg.poppet.auth.infra.config.KakaoOAuthConfig;
 import com.gdg.poppet.global.exception.GlobalException;
 import com.gdg.poppet.global.status.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -24,43 +21,41 @@ import reactor.core.publisher.Mono;
 public class KakaoAuthClient {
 
     private final WebClient webClient;
-
-    @Value("${kakao.oauth2.client}")
-    private String clientId;
-
-    @Value("${kakao.oauth2.redirect}")
-    private String redirectUri;
-
-    @Value("${kakao.oauth2.token-uri}")
-    private String tokenUri;
-
-    @Value("${kakao.oauth2.user-info-uri}")
-    private String userInfoUri;
+    private final KakaoOAuthConfig kakaoOAuthConfig;
 
     /**
-     * 0) 모바일용 Access Token 검증 및 프로필 조회
+     * 모바일용 Access Token 검증 및 프로필 조회
      */
     public Mono<KakaoProfileDTO> verifyAccessToken(String accessToken) {
+        log.debug("Verifying Kakao access token");
         return webClient.get()
-                .uri(userInfoUri)
-                .headers(h -> h.setBearerAuth(accessToken))
+                .uri(kakaoOAuthConfig.getUserInfoUri())
+                .headers(h -> {
+                    h.set("Authorization", "Bearer " + accessToken);
+                    h.set("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
+                })
                 .retrieve()
-                .onStatus(HttpStatusCode::isError,
-                        resp -> Mono.error(new GlobalException(ErrorStatus.PROFILE_ERROR)))
+                .onStatus(HttpStatusCode::isError, clientResponse -> {
+                    log.error("카카오 프로필 조회 실패 - 상태 코드: {}, URI: {}",
+                             clientResponse.statusCode(), kakaoOAuthConfig.getUserInfoUri());
+                    return clientResponse.bodyToMono(String.class)
+                            .doOnNext(errorBody -> log.error("카카오 API 에러 응답: {}", errorBody))
+                            .then(Mono.error(new GlobalException(ErrorStatus.PROFILE_ERROR)));
+                })
                 .bodyToMono(KakaoProfileDTO.class)
                 .doOnNext(profile -> log.debug("Verified Kakao profile: {}", profile));
     }
 
     /**
-     * 1) authorization code → Access Token 교환
+     * authorization code → Access Token 교환 후 바로 프로필 조회
      */
-    public Mono<KakaoOAuthTokenDTO> requestToken(String accessCode) {
+    public Mono<KakaoProfileDTO> requestTokenAndProfile(String accessCode) {
         return webClient.post()
-                .uri(tokenUri)
+                .uri(kakaoOAuthConfig.getTokenUri())
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(BodyInserters.fromFormData("grant_type", "authorization_code")
-                        .with("client_id", clientId)
-                        .with("redirect_uri", redirectUri)
+                        .with("client_id", kakaoOAuthConfig.getClient())
+                        .with("redirect_uri", kakaoOAuthConfig.getRedirect())
                         .with("code", accessCode))
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> {
@@ -68,25 +63,34 @@ public class KakaoAuthClient {
                     return clientResponse.bodyToMono(String.class)
                             .map(errorBody -> new GlobalException(ErrorStatus.OAUTH_ERROR));
                 })
-                .bodyToMono(KakaoOAuthTokenDTO.class)
-                .doOnNext(token -> log.info("Kakao OAuth token: {}", token.getAccess_token()));
+                .bodyToMono(Map.class)
+                .doOnNext(tokenResponse -> log.info("Kakao OAuth token received"))
+                .flatMap(this::requestProfileWithToken);
     }
 
     /**
-     * 2) Access Token → Kakao UserInfo 조회
+     * Access Token으로 Kakao UserInfo 조회 (내부 메서드)
      */
-    public Mono<KakaoProfileDTO> requestProfile(KakaoOAuthTokenDTO tokenDto) {
+    private Mono<KakaoProfileDTO> requestProfileWithToken(Map<String, Object> tokenResponse) {
+        String accessToken = (String) tokenResponse.get("access_token");
+        if (accessToken == null) {
+            return Mono.error(new GlobalException(ErrorStatus.OAUTH_TOKEN_ERROR));
+        }
+
+        log.debug("Requesting Kakao profile with token");
         return webClient.get()
-                .uri(userInfoUri)
+                .uri(kakaoOAuthConfig.getUserInfoUri())
                 .headers(h -> {
-                    h.setBearerAuth(tokenDto.getAccess_token());
-                    h.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+                    h.set("Authorization", "Bearer " + accessToken);
+                    h.set("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
                 })
                 .retrieve()
-                .onStatus(
-                        HttpStatusCode::isError,
-                        resp -> Mono.error(new GlobalException(ErrorStatus.PROFILE_ERROR))
-                )
+                .onStatus(HttpStatusCode::isError, clientResponse -> {
+                    log.error("카카오 프로필 조회 실패 - 상태 코드: {}", clientResponse.statusCode());
+                    return clientResponse.bodyToMono(String.class)
+                            .doOnNext(errorBody -> log.error("카카오 API 에러 응답: {}", errorBody))
+                            .then(Mono.error(new GlobalException(ErrorStatus.PROFILE_ERROR)));
+                })
                 .bodyToMono(KakaoProfileDTO.class)
                 .doOnNext(profile -> log.info("Kakao profile: {}", profile));
     }
