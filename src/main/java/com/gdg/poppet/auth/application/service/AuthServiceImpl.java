@@ -32,7 +32,7 @@ public class AuthServiceImpl implements AuthService {
     public OAuthResult kakaoOAuthLogin(String accessCode) {
         try {
             // 인가코드로 토큰 발급 후 바로 프로필 조회
-            KakaoProfileDTO kakaoProfile = kakaoAuthClient.requestTokenAndProfile(accessCode).block();
+            KakaoProfileDTO kakaoProfile = kakaoAuthClient.requestTokenAndProfile(accessCode);
             if (kakaoProfile == null) {
                 throw new GlobalException(ErrorStatus.PROFILE_ERROR);
             }
@@ -58,7 +58,7 @@ public class AuthServiceImpl implements AuthService {
     public OAuthResult kakaoOAuthLoginWithTokens(String accessToken) {
         try {
             // 액세스 토큰으로 프로필 조회
-            KakaoProfileDTO profile = kakaoAuthClient.verifyAccessToken(accessToken).block();
+            KakaoProfileDTO profile = kakaoAuthClient.verifyAccessToken(accessToken);
             if (profile == null) {
                 throw new GlobalException(ErrorStatus.PROFILE_ERROR);
             }
@@ -84,7 +84,7 @@ public class AuthServiceImpl implements AuthService {
     public OAuthResult appleOAuthLoginWithTokens(String identityToken) {
         try {
             // Identity Token 검증 및 프로필 조회
-            AppleProfileDTO profile = appleAuthClient.verifyIdentityToken(identityToken).block();
+            AppleProfileDTO profile = appleAuthClient.verifyIdentityToken(identityToken);
             if (profile == null) {
                 throw new GlobalException(ErrorStatus.PROFILE_ERROR);
             }
@@ -100,7 +100,7 @@ public class AuthServiceImpl implements AuthService {
             String jwt = jwtService.createAccessToken(user.getUserId(), user.getProvider());
             return new OAuthResult(jwt, UserDto.of(user.getUsername()));
         } catch (Exception e) {
-            log.error("Apple 토큰 로그인 실패: {}", e.getMessage(), e);
+            log.error("애플 토큰 로그인 실패: {}", e.getMessage(), e);
             throw new GlobalException(ErrorStatus.OAUTH_ERROR);
         }
     }
