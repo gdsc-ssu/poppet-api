@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public interface AuthService {
     OAuthResult kakaoOAuthLogin(String accessCode);
-    OAuthResult googleOAuthLogin(String accessCode);
     OAuthResult kakaoOAuthLoginWithTokens(String accessToken);
-    OAuthResult googleOAuthLoginWithTokens(String idToken, String accessToken);
+    OAuthResult appleOAuthLoginWithTokens(String identityToken);
 }

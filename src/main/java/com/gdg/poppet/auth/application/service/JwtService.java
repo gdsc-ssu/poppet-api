@@ -1,11 +1,15 @@
 package com.gdg.poppet.auth.application.service;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import com.gdg.poppet.user.domain.enums.Provider;
 import com.gdg.poppet.user.domain.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.util.Date;
 import java.util.Optional;
 import lombok.Getter;
@@ -48,16 +52,25 @@ public class JwtService {
     private final UserRepository userRepository;
 
     /**
+     * 서명 키 생성
+     */
+    private Key getSigningKey() {
+        byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    /**
      * AccessToken 생성 메소드
      */
     public String createAccessToken(String userId, Provider provider) {
         Date now = new Date();
-        return JWT.create() // JWT 토큰을 생성하는 빌더 반환
-                .withSubject(ACCESS_TOKEN_SUBJECT) // JWT의 Subject 지정 -> AccessToken이므로 AccessToken
-                .withExpiresAt(new Date(now.getTime() + accessTokenExpirationPeriod)) // 토큰 만료 시간 설정
-                .withClaim(USER_ID_CLAIM, userId)
-                .withClaim(PROVIDER_CLAIM, provider.name())
-                .sign(Algorithm.HMAC512(secretKey)); // HMAC512 알고리즘 사용, application.yml에서 지정한 secret 키로 암호화
+        return Jwts.builder()
+                .setSubject(ACCESS_TOKEN_SUBJECT)
+                .setExpiration(new Date(now.getTime() + accessTokenExpirationPeriod))
+                .claim(USER_ID_CLAIM, userId)
+                .claim(PROVIDER_CLAIM, provider.name())
+                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+                .compact();
     }
 
     /**
@@ -65,10 +78,11 @@ public class JwtService {
      */
     public String createRefreshToken() {
         Date now = new Date();
-        return JWT.create()
-                .withSubject(REFRESH_TOKEN_SUBJECT)
-                .withExpiresAt(new Date(now.getTime() + refreshTokenExpirationPeriod))
-                .sign(Algorithm.HMAC512(secretKey));
+        return Jwts.builder()
+                .setSubject(REFRESH_TOKEN_SUBJECT)
+                .setExpiration(new Date(now.getTime() + refreshTokenExpirationPeriod))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+                .compact();
     }
 
     /**
@@ -137,22 +151,25 @@ public class JwtService {
 
     public boolean isTokenValid(String token) {
         try {
-            JWT.require(Algorithm.HMAC512(secretKey)).build().verify(token);
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
             return true;
         } catch (Exception e) {
             log.error("유효하지 않은 토큰입니다. {}", e.getMessage());
             return false;
         }
     }
+
     public Optional<String> extractUserId(String token) {
         try {
-            return Optional.ofNullable(
-                    JWT.require(Algorithm.HMAC512(secretKey))
-                            .build()
-                            .verify(token)
-                            .getClaim(USER_ID_CLAIM)
-                            .asString()
-            );
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            return Optional.ofNullable(claims.get(USER_ID_CLAIM, String.class));
         } catch (Exception e) {
             log.error("유효하지 않은 토큰입니다. {}", e.getMessage());
             return Optional.empty();
@@ -161,11 +178,12 @@ public class JwtService {
 
     public Optional<Provider> extractProvider(String token) {
         try {
-            String prov = JWT.require(Algorithm.HMAC512(secretKey))
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
                     .build()
-                    .verify(token)
-                    .getClaim(PROVIDER_CLAIM)
-                    .asString();
+                    .parseClaimsJws(token)
+                    .getBody();
+            String prov = claims.get(PROVIDER_CLAIM, String.class);
             return Optional.of(Provider.valueOf(prov));
         } catch (Exception e) {
             log.error("프로바이더 추출 실패: {}", e.getMessage());
