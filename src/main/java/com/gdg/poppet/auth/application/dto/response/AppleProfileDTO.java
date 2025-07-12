@@ -44,6 +44,9 @@ public class AppleProfileDTO {
     @JsonProperty("nonce_supported")
     private Boolean nonceSupported;
 
+    @JsonProperty("name")
+    private String name; // 사용자 전체 이름 (firstName + lastName 조합)
+
     // 사용자 식별을 위한 ID 반환
     public String getId() {
         return this.sub;
@@ -52,5 +55,10 @@ public class AppleProfileDTO {
     // 이메일이 있을 때만 반환
     public String getValidEmail() {
         return (email != null && !email.trim().isEmpty()) ? email : null;
+    }
+
+    // 이름이 있을 때만 반환
+    public String getValidName() {
+        return (name != null && !name.trim().isEmpty()) ? name.trim() : null;
     }
 }

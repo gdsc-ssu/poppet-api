@@ -179,7 +179,41 @@ public class AppleAuthClient {
             .exp(claims.getExpiration().getTime())
             .authTime(claims.get("auth_time", Long.class))
             .nonceSupported(claims.get("nonce_supported", Boolean.class))
+            .name(parseFullNameFromClaims(claims))
             .build();
+    }
+
+    /**
+     * Claims에서 전체 이름 파싱 (firstName + lastName 조합)
+     */
+    private String parseFullNameFromClaims(Claims claims) {
+        try {
+            @SuppressWarnings("unchecked")
+            var nameMap = claims.get("name", java.util.Map.class);
+            
+            if (nameMap == null) {
+                return null;
+            }
+            
+            String firstName = (String) nameMap.get("firstName");
+            String lastName = (String) nameMap.get("lastName");
+            
+            StringBuilder fullName = new StringBuilder();
+            if (firstName != null && !firstName.trim().isEmpty()) {
+                fullName.append(firstName.trim());
+            }
+            if (lastName != null && !lastName.trim().isEmpty()) {
+                if (fullName.length() > 0) {
+                    fullName.append(" ");
+                }
+                fullName.append(lastName.trim());
+            }
+            
+            return fullName.length() > 0 ? fullName.toString() : null;
+        } catch (Exception e) {
+            log.warn("name claim 파싱 실패: {}", e.getMessage());
+            return null;
+        }
     }
 
     /**
