@@ -150,13 +150,26 @@ public class AuthServiceImpl implements AuthService {
             Gender gender = Gender.MALE; // 기본값
             int defaultAge = 25; // 기본 나이
 
-            // Apple은 이메일이 있을 때만 사용자명으로 사용, 없으면 기본 이름
-            String username = appleProfile.getValidEmail();
+            // 우선순위: 1) 실제 이름, 2) 이메일 @ 앞 부분, 3) 기본 이름
+            String username = null;
+            
+            // 1. 실제 이름이 있는 경우 (첫 로그인 시에만 제공)
+            String fullName = appleProfile.getValidName();
+            if (fullName != null && !fullName.trim().isEmpty()) {
+                username = fullName.trim();
+            }
+            
+            // 2. 이름이 없고 이메일이 있는 경우
+            if (username == null) {
+                String email = appleProfile.getValidEmail();
+                if (email != null && !email.trim().isEmpty()) {
+                    username = email.split("@")[0];
+                }
+            }
+            
+            // 3. 둘 다 없는 경우 기본 이름
             if (username == null || username.trim().isEmpty()) {
-                username = "Apple사용자" + appleProfile.getId().substring(0, 8); // 기본 이름
-            } else {
-                // 이메일에서 @ 앞 부분을 사용자명으로 사용
-                username = username.split("@")[0];
+                username = "Apple사용자" + appleProfile.getId().substring(0, 8);
             }
 
             return userRepository.save(
